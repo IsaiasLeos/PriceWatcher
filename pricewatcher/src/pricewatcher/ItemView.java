@@ -2,85 +2,168 @@ package pricewatcher;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.net.URL;
-
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-/** A special panel to display the detail of an item. */
-
+/**
+ * A special panel to display the detail of an item.
+ */
 @SuppressWarnings("serial")
 public class ItemView extends JPanel {
-    
-	/** Interface to notify a click on the view page icon. */
-	public interface ClickListener {
-		
-		/** Callback to be invoked when the view page icon is clicked. */
-		void clicked();
-	}
-	
-	/** Directory for image files: src/image in Eclipse. */
-	private final static String IMAGE_DIR = "/image/";
-        
-	/** View-page clicking listener. */
+
+    private List<Product> itemList;
+    private Image openBrowserIcon;
+
+    /**
+     * Interface to notify a click on the view page icon.
+     */
+    public interface ClickListener {
+
+        /**
+         * Callback to be invoked when the view page icon is clicked.
+         */
+        void clicked();
+    }
+
+    /**
+     * Directory for image files: src/image in Eclipse.
+     */
+    private final static String IMAGE_DIR = "/image/";
+
+    /**
+     * View-page clicking listener.
+     */
     private ClickListener listener;
-    
-    /** Create a new instance. */
-    public ItemView() {
-    	setPreferredSize(new Dimension(100, 160));
+
+    /**
+     * Create a new instance.
+     *
+     * @param itemList a list contain the current amount of Products
+     */
+    public ItemView(List<Product> itemList) {
+        this.itemList = itemList;
+        this.openBrowserIcon = getImage("openWebpageIcon.png");
         setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(1280, 720));//Learn what this does.
         addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
-            	if (isViewPageClicked(e.getX(), e.getY()) && listener != null) {
-            		listener.clicked();
-            	}
+                if (listener != null && isViewPageClicked(e.getX(), e.getY())) {
+                    listener.clicked();
+                }
             }
         });
     }
-        
-    /** Set the view-page click listener. */
+
+    /**
+     * Set the view-page click listener.
+     *
+     * @param listener
+     */
     public void setClickListener(ClickListener listener) {
-    	this.listener = listener;
+        this.listener = listener;
     }
-    
-    /** Overridden here to display the details of the item. */
+
+    /**
+     * Display the details of an item list within the ItemView Panel. Overridden
+     * here to display the details of the item.
+     */
     @Override
-	public void paintComponent(Graphics g) {
-        super.paintComponent(g); 
-        //Dimension dim = getSize();
-        
-        //--
-        //-- WRITE YOUR CODE HERE!
-        //--
-        int x = 20, y = 30;
-        // g.drawImage(getImage("view.png"), x, y)
-        g.drawString("[View]", x, y);
-        y += 20;
-        g.drawString("Hi, I am your item!", x, y);
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setFont(new Font("Arial", Font.PLAIN, 16));
+//        Dimension dim = getSize();
+//        System.out.println("Height: " + dim.height + "\nWidth:" + dim.width);
+        int x = 20, y = 0;
+        g.drawImage(openBrowserIcon, x, y, this);
+        y += openBrowserIcon.getHeight(this) + 20;
+        for (Product item : itemList) {
+            g.drawString(textAttrManipulation("Name:      ",item.getProductName(), Font.BOLD, Color.BLACK), x, y);
+            y += 20;
+            g.drawString("URL:         " + item.getProductURL(), x, y);
+            y += 20;
+            g.drawString(textAttrManipulation("Price:       ",
+                    item.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
+            y += 20;
+            float f = (float) item.getChange();
+            Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
+            g.drawString(textAttrManipulation("Change:   ",
+                    Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
+            y += 20;
+            g.drawString("Added:    " + item.getAddedDate() + " ("
+                    + item.getInitialPrice() + "$)", x, y);
+           
+            g.dispose();
+        }
     }
-    
-    /** Return true if the given screen coordinate is inside the viewPage icon. */
+
+    /**
+     * Manipulates the given two strings. Changes the first string to make the
+     * same font style, but ignores color and fond type. Changes the color and
+     * font type of the second string given the font style and color.
+     *
+     * @param productPrefix first part of the string
+     * @param productPostfix second part of the string
+     * @param font the font type e.g. bold or plain
+     * @param color the color of the font
+     * @return the re-formated string
+     */
+    private AttributedCharacterIterator textAttrManipulation(String productPrefix, String productPostfix, int font, Color color) {
+        AttributedString text = new AttributedString(productPrefix + productPostfix);
+        text.addAttribute(TextAttribute.FONT, new Font("Arial", Font.PLAIN, 16),
+                0, productPrefix.length() + productPostfix.length());
+        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 16),
+                productPrefix.length(),
+                productPrefix.length() + productPostfix.length());
+        text.addAttribute(TextAttribute.FOREGROUND, color,
+                productPrefix.length(),
+                productPrefix.length() + productPostfix.length());
+        return text.getIterator();
+    }
+
+    /**
+     *
+     * @param x x-coordinate of the mouse pointer
+     * @param y y-coordinate of the mouse pointer
+     * @return true if the given screen coordinate is inside the viewPage icon.
+     */
     private boolean isViewPageClicked(int x, int y) {
-    	//--
-    	//-- WRITE YOUR CODE HERE
-    	//--
-    	return new Rectangle(20, 20, 30, 20).contains(x,  y);
+        return new Rectangle(20, 0, openBrowserIcon.getHeight(this),
+                openBrowserIcon.getWidth(this)).contains(x, y);
     }
-        
-    /** Return the image stored in the given file. */
+
+    /**
+     * Return the image stored in the given file.
+     *
+     * @param file
+     * @return
+     */
     public Image getImage(String file) {
         try {
-        	URL url = new URL(getClass().getResource(IMAGE_DIR), file);
+            URL url = new URL(getClass().getResource(IMAGE_DIR), file);
             return ImageIO.read(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     *
+     * @param audioFile
+     */
+    public void playOnPriceIncrease(String audioFile) {
     }
 }
