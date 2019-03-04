@@ -2,11 +2,17 @@ package pricewatcher;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,6 +30,7 @@ public class Main extends JFrame {
 
     private Product product;
     private java.util.List<Product> productList;
+    private itemManagement webContent;
 
     /**
      * Default dimension of the dialog.
@@ -60,6 +67,7 @@ public class Main extends JFrame {
         String itemDateAdded = "1/30/2019";
         this.product = new Product(itemName, itemURL, itemPrice, itemDateAdded);
         this.productList = new ArrayList<>();
+        this.webContent = new itemManagement();
         productList.add(product);
         setSize(dim);
         configureUI();
@@ -76,7 +84,12 @@ public class Main extends JFrame {
      * price change.
      */
     private void refreshButtonClicked(ActionEvent event) {
-
+        //System.out.println(event.toString());
+        productList.forEach((iter) -> {
+            iter.checkPrice(webContent.getSimulatedPrice());
+        });
+        super.repaint();
+        showMessage(product.getProductPrice() + "$");
     }
 
     /**
@@ -84,7 +97,14 @@ public class Main extends JFrame {
      * (default) web browser by supplying the URL of the item.
      */
     private void viewPageClicked() {
-
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(product.getProductURL()));
+            } catch (URISyntaxException | IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        showMessage("Opening Webpage...");
     }
 
     /**
@@ -100,7 +120,7 @@ public class Main extends JFrame {
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.GRAY)));
         board.setLayout(new GridLayout(1, 1));
-        itemView = new ItemView();
+        itemView = new ItemView(productList);
         itemView.setClickListener(this::viewPageClicked);
         board.add(itemView);
         add(board, BorderLayout.CENTER);
