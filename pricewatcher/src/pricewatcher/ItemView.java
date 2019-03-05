@@ -111,7 +111,7 @@ public class ItemView extends JPanel {
             float f = (float) item.getChange();
             Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
             if (f < 0.0) {
-                priceDropSound("test.mp3");
+                priceDropSound("play.wav");
             }
             g.drawString(textAttrManipulation("Change:   ",
                     Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
@@ -181,11 +181,11 @@ public class ItemView extends JPanel {
      *
      * @param file
      */
-    private void priceDropSound(String file) {
+    private void priceDropSound(String filename) {
         try {
-            System.out.println(System.getProperty("user.dir"));
-            URL url = new URL("");
-            AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(file));
+            System.out.println(getClass().getResource("/sound/") + filename);
+            URL url = new URL(getClass().getResource("/sound/"), filename);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
             clip.start();
