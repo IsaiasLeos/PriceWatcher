@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -29,7 +30,7 @@ import javax.swing.SwingUtilities;
 public class Main extends JFrame {
 
     private Product product;
-    private java.util.List<Product> productList;
+    private List<Product> productList;
     private itemManagement webContent;
 
     /**

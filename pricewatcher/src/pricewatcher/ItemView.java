@@ -9,12 +9,18 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.List;
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 
 /**
@@ -38,9 +44,14 @@ public class ItemView extends JPanel {
     }
 
     /**
-     * Directory for image files: src/image in Eclipse.
+     * Directory for image files: src/image.
      */
     private final static String IMAGE_DIR = "/image/";
+
+    /**
+     * Directory for image files: src/sound.
+     */
+    private final static String SOUND_DIR = "/sound/";
 
     /**
      * View-page clicking listener.
@@ -90,7 +101,7 @@ public class ItemView extends JPanel {
         g.drawImage(openBrowserIcon, x, y, this);
         y += openBrowserIcon.getHeight(this) + 20;
         for (Product item : itemList) {
-            g.drawString(textAttrManipulation("Name:      ",item.getProductName(), Font.BOLD, Color.BLACK), x, y);
+            g.drawString(textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK), x, y);
             y += 20;
             g.drawString("URL:         " + item.getProductURL(), x, y);
             y += 20;
@@ -99,12 +110,15 @@ public class ItemView extends JPanel {
             y += 20;
             float f = (float) item.getChange();
             Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
+            if (f < 0.0) {
+                priceDropSound("test.mp3");
+            }
             g.drawString(textAttrManipulation("Change:   ",
                     Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
             y += 20;
             g.drawString("Added:    " + item.getAddedDate() + " ("
                     + item.getInitialPrice() + "$)", x, y);
-           
+
             g.dispose();
         }
     }
@@ -153,6 +167,7 @@ public class ItemView extends JPanel {
     public Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource(IMAGE_DIR), file);
+            System.out.println(url.toString());
             return ImageIO.read(url);
         } catch (IOException e) {
             e.printStackTrace();
@@ -161,9 +176,22 @@ public class ItemView extends JPanel {
     }
 
     /**
+     * Play the audio clip (wav) specified by a URL. This method has no effect
+     * if the audio clip cannot be found.
      *
-     * @param audioFile
+     * @param file
      */
-    public void playOnPriceIncrease(String audioFile) {
+    private void priceDropSound(String file) {
+        try {
+            System.out.println(System.getProperty("user.dir")+System.getProperty("file.sperator"));
+            URL url = new URL("");
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(file));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
     }
+
 }
