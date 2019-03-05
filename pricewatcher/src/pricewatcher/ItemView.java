@@ -183,7 +183,7 @@ public class ItemView extends JPanel {
      */
     private void priceDropSound(String file) {
         try {
-            System.out.println(System.getProperty("user.dir")+System.getProperty("file.sperator"));
+            System.out.println(System.getProperty("user.dir"));
             URL url = new URL("");
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(file));
             Clip clip = AudioSystem.getClip();
