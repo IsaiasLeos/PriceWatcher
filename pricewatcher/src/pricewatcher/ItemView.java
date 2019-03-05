@@ -9,7 +9,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
@@ -110,7 +109,7 @@ public class ItemView extends JPanel {
             y += 20;
             float f = (float) item.getChange();
             Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
-            if (f < 0.0) {
+            if (f > 0.0) {
                 priceDropSound("play.wav");
             }
             g.drawString(textAttrManipulation("Change:   ",
