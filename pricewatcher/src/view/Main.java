@@ -1,5 +1,7 @@
-package pricewatcher;
+package view;
 
+import model.Product;
+import controller.itemManagement;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
