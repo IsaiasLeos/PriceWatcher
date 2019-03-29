@@ -1,7 +1,7 @@
 package view;
 
 import model.Product;
-import controller.itemManagement;
+import controller.PriceFinder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
@@ -26,14 +26,14 @@ import javax.swing.SwingUtilities;
 /**
  * A dialog for tracking the price of an item.
  *
- * @author Yoonsik Cheon
+ * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
 public class Main extends JFrame {
 
     private Product product;
     private List<Product> productList;
-    private itemManagement webContent;
+    private PriceFinder webContent;
 
     /**
      * Default dimension of the dialog.
@@ -70,7 +70,7 @@ public class Main extends JFrame {
         String itemDateAdded = "1/30/2019";
         this.product = new Product(itemName, itemURL, itemPrice, itemDateAdded);
         this.productList = new ArrayList<>();
-        this.webContent = new itemManagement();
+        this.webContent = new PriceFinder();
         productList.add(product);
         setSize(dim);
         configureUI();
@@ -80,7 +80,7 @@ public class Main extends JFrame {
         setResizable(true);
         showMessage("Welcome!");
     }
-
+    
     /**
      * Callback to be invoked when the refresh button is clicked. Find the
      * current price of the watched item and display it along with a percentage

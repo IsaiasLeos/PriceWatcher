@@ -25,6 +25,8 @@ import javax.swing.JPanel;
 
 /**
  * A special panel to display the detail of an item.
+ *
+ * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
 public class ItemView extends JPanel {
@@ -46,7 +48,7 @@ public class ItemView extends JPanel {
     /**
      * Directory for image files: src/image.
      */
-    private final static String RESOURCE_DIR = "/image/";
+    private final static String RESOURCE_DIR = "/resources/";
 
     /**
      * View-page clicking listener.
@@ -96,24 +98,35 @@ public class ItemView extends JPanel {
         g.drawImage(openBrowserIcon, x, y, this);
         y += openBrowserIcon.getHeight(this) + 20;
         for (Product item : itemList) {
-            g.drawString(textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK), x, y);
+            g.drawString(
+                    textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK),
+                    x,
+                    y);
             y += 20;
-            g.drawString("URL:         " + item.getProductURL(), x, y);
+            g.drawString(
+                    "URL:         " + item.getProductURL(),
+                    x,
+                    y);
             y += 20;
-            g.drawString(textAttrManipulation("Price:       ",
-                    item.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
+            g.drawString(
+                    textAttrManipulation("Price:       ", item.getProductPrice() + "$", Font.PLAIN, Color.BLUE),
+                    x,
+                    y);//Green or Red
             y += 20;
             float f = (float) item.getChange();
             Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
             if (f > 0.0) {
                 priceDropSound("play.wav");
             }
-            g.drawString(textAttrManipulation("Change:   ",
-                    Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
+            g.drawString(
+                    textAttrManipulation("Change:   ", Math.abs(item.getChange()) + "%", Font.PLAIN, change),
+                    x,
+                    y);//Green or Red
             y += 20;
-            g.drawString("Added:    " + item.getAddedDate() + " ("
-                    + item.getInitialPrice() + "$)", x, y);
-
+            g.drawString(
+                    "Added:    " + item.getAddedDate() + " (" + item.getInitialPrice() + "$)",
+                    x,
+                    y);
             g.dispose();
         }
     }
@@ -131,7 +144,7 @@ public class ItemView extends JPanel {
      */
     private AttributedCharacterIterator textAttrManipulation(String productPrefix, String productPostfix, int font, Color color) {
         AttributedString text = new AttributedString(productPrefix + productPostfix);
-        text.addAttribute(TextAttribute.FONT, new Font("Arial", Font.PLAIN, 16),
+        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 16),
                 0, productPrefix.length() + productPostfix.length());
         text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 16),
                 productPrefix.length(),
@@ -188,5 +201,4 @@ public class ItemView extends JPanel {
             e.printStackTrace();
         }
     }
-
 }
