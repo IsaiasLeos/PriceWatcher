@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 public class ItemView extends JPanel {
 
     private List<Product> itemList;
-    private Image openBrowserIcon;
+    private Image itemIcon;
 
     /**
      * Interface to notify a click on the view page icon.
@@ -60,9 +60,10 @@ public class ItemView extends JPanel {
      *
      * @param itemList a list contain the current amount of Products
      */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public ItemView(List<Product> itemList) {
         this.itemList = itemList;
-        this.openBrowserIcon = getImage("openWebpageIcon.png");
+        this.itemIcon = getImage("itemIcon.png");
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(1280, 720));//Learn what this does.
         addMouseListener(new MouseAdapter() {
@@ -92,43 +93,29 @@ public class ItemView extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setFont(new Font("Arial", Font.PLAIN, 16));
-//        Dimension dim = getSize();
-//        System.out.println("Height: " + dim.height + "\nWidth:" + dim.width);
+        Dimension dim = getSize();
+        System.out.println("Height: " + dim.height + "\nWidth:" + dim.width);
         int x = 20, y = 0;
-        g.drawImage(openBrowserIcon, x, y, this);
-        y += openBrowserIcon.getHeight(this) + 20;
+        g.drawImage(itemIcon, x, y, this);
+        y += itemIcon.getHeight(this) + 20;
         for (Product item : itemList) {
-            g.drawString(
-                    textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK),
-                    x,
-                    y);
+            g.drawString(textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK), x, y);
             y += 20;
-            g.drawString(
-                    "URL:         " + item.getProductURL(),
-                    x,
-                    y);
+            g.drawString("URL:         " + item.getProductURL(), x, y);
             y += 20;
-            g.drawString(
-                    textAttrManipulation("Price:       ", item.getProductPrice() + "$", Font.PLAIN, Color.BLUE),
-                    x,
-                    y);//Green or Red
+            g.drawString(textAttrManipulation("Price:       ", item.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
             y += 20;
             float f = (float) item.getChange();
             Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
             if (f > 0.0) {
                 priceDropSound("play.wav");
             }
-            g.drawString(
-                    textAttrManipulation("Change:   ", Math.abs(item.getChange()) + "%", Font.PLAIN, change),
-                    x,
-                    y);//Green or Red
+            g.drawString(textAttrManipulation("Change:   ", Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
             y += 20;
-            g.drawString(
-                    "Added:    " + item.getAddedDate() + " (" + item.getInitialPrice() + "$)",
-                    x,
-                    y);
-            g.dispose();
+            g.drawString("Added:    " + item.getAddedDate() + " (" + item.getInitialPrice() + "$)", x, y);
+            y += 80;
         }
+        g.dispose();
     }
 
     /**
@@ -162,8 +149,8 @@ public class ItemView extends JPanel {
      * @return true if the given screen coordinate is inside the viewPage icon.
      */
     private boolean isViewPageClicked(int x, int y) {
-        return new Rectangle(20, 0, openBrowserIcon.getHeight(this),
-                openBrowserIcon.getWidth(this)).contains(x, y);
+        return new Rectangle(20, 0, itemIcon.getHeight(this),
+                itemIcon.getWidth(this)).contains(x, y);
     }
 
     /**
@@ -172,6 +159,7 @@ public class ItemView extends JPanel {
      * @param file
      * @return
      */
+    @SuppressWarnings("CallToPrintStackTrace")
     public Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource(RESOURCE_DIR), file);
@@ -189,6 +177,7 @@ public class ItemView extends JPanel {
      *
      * @param file
      */
+    @SuppressWarnings("CallToPrintStackTrace")
     private void priceDropSound(String filename) {
         try {
             System.out.println(getClass().getResource(RESOURCE_DIR) + filename);

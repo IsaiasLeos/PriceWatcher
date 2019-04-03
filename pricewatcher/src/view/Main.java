@@ -17,10 +17,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 /**
@@ -36,9 +38,14 @@ public class Main extends JFrame {
     private PriceFinder webContent;
 
     /**
+     * Directory for image files: src/image.
+     */
+    private final static String RESOURCE_DIR = "/resources/";
+
+    /**
      * Default dimension of the dialog.
      */
-    private final static Dimension DEFAULT_SIZE = new Dimension(400, 300);
+    private final static Dimension DEFAULT_SIZE = new Dimension(800, 600);
 
     /**
      * Special panel to display the watched item.
@@ -48,7 +55,7 @@ public class Main extends JFrame {
     /**
      * Message bar to display various messages.
      */
-    private JLabel msgBar = new JLabel(" ");
+    private final JLabel msgBar = new JLabel(" ");
 
     /**
      * Create a new dialog.
@@ -62,6 +69,7 @@ public class Main extends JFrame {
      *
      * @param dim
      */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public Main(Dimension dim) {
         super("Price Watcher");
         String itemURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
@@ -72,27 +80,57 @@ public class Main extends JFrame {
         this.productList = new ArrayList<>();
         this.webContent = new PriceFinder();
         productList.add(product);
+        setDefaultLookAndFeelDecorated(true);
+        setLayout(new FlowLayout());
         setSize(dim);
         configureUI();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setResizable(true);
         showMessage("Welcome!");
     }
-    
+
     /**
      * Callback to be invoked when the refresh button is clicked. Find the
      * current price of the watched item and display it along with a percentage
      * price change.
+     *
+     * @param event
      */
     private void refreshButtonClicked(ActionEvent event) {
-        //System.out.println(event.toString());
-        productList.forEach((iter) -> {
-            iter.checkPrice(webContent.getSimulatedPrice());
-        });
-        super.repaint();
-        showMessage(product.getProductPrice() + "$");
+//        System.out.println(event.toString());
+//        productList.forEach((iter) -> {
+//            iter.checkPrice(webContent.getSimulatedPrice());
+//        });
+//        super.repaint();
+//        showMessage(product.getProductPrice() + "$");
+    }
+
+    private void singleRefreshButtonClicked(ActionEvent event) {
+//        System.out.println(event.toString());
+//        productList.forEach((iter) -> {
+//            iter.checkPrice(webContent.getSimulatedPrice());
+//        });
+//        super.repaint();
+//        showMessage(product.getProductPrice() + "$");
+    }
+
+    private void addButtonClicked(ActionEvent event) {
+
+    }
+
+    private void searchButtonClicked(ActionEvent event) {
+
+    }
+
+    private void forwardButtonClicked(ActionEvent event) {
+
+    }
+
+    private void backwardButtonClicked(ActionEvent event) {
+
     }
 
     /**
@@ -107,7 +145,7 @@ public class Main extends JFrame {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        showMessage("Opening Webpage...");
+        showMessage("Opening Webpage");
     }
 
     /**
@@ -131,20 +169,74 @@ public class Main extends JFrame {
         add(msgBar, BorderLayout.SOUTH);
     }
 
+    private void delete(ActionEvent event) {
+
+    }
+
+    private void edit(ActionEvent event) {
+
+    }
+
+    private void openWeb(ActionEvent event) {
+
+    }
+
     /**
      * Create a control panel consisting of a refresh button.
      */
     private JPanel makeControlPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        JButton refreshButton = new JButton("Refresh");
-        refreshButton.setFocusPainted(false);
-        refreshButton.addActionListener(this::refreshButtonClicked);
-        panel.add(refreshButton);
+        JToolBar toolBar = new JToolBar("Toolbar");
+        panel.add(toolBar, BorderLayout.PAGE_END);
+        JButton checkmark = createButton("checkmark.png", false);
+        checkmark.addActionListener(this::refreshButtonClicked);
+        toolBar.add(checkmark);
+        JButton add = createButton("plus.png", false);
+        add.addActionListener(this::addButtonClicked);
+        toolBar.add(add);
+        JButton search = createButton("search.png", false);
+        search.addActionListener(this::searchButtonClicked);
+        toolBar.add(search);
+        JButton forward = createButton("forward.png", false);
+        forward.addActionListener(this::forwardButtonClicked);
+        toolBar.add(forward);
+        JButton backward = createButton("back.png", false);
+        backward.addActionListener(this::backwardButtonClicked);
+        toolBar.add(backward);
+        toolBar.addSeparator();
+        JButton singleRefresh = createButton("refresh.png", false);
+        singleRefresh.addActionListener(this::singleRefreshButtonClicked);
+        toolBar.add(singleRefresh);
+        JButton openLink = createButton("link.png", false);
+        openLink.addActionListener(this::openWeb);
+        toolBar.add(openLink);
+        JButton delete = createButton("delete.png", false);
+        delete.addActionListener(this::delete);
+        toolBar.add(delete);
+        JButton edit = createButton("edit.png", false);
+        edit.addActionListener(this::edit);
+        toolBar.add(edit);
         return panel;
     }
 
     /**
+     * Create a button with the given label.
+     *
+     * @param label name of the resource (image)
+     * @param enabled
+     * @return a button
+     */
+    private JButton createButton(String label, boolean enabled) {
+        JButton button = new JButton(new ImageIcon(getClass().getClassLoader()
+                .getResource("resources/" + label)));
+        button.setFocusPainted(enabled);
+        return button;
+    }
+
+    /**
      * Show briefly the given string in the message bar.
+     *
+     * @param msg
      */
     private void showMessage(String msg) {
         msgBar.setText(msg);
@@ -166,5 +258,4 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         Main main = new Main();
     }
-
 }
