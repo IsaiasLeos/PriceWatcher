@@ -34,7 +34,6 @@ import javax.swing.SwingUtilities;
 public class Main extends JFrame {
 
     private Product product;
-    private List<Product> productList;
     private PriceFinder webContent;
 
     /**
@@ -77,9 +76,7 @@ public class Main extends JFrame {
         double itemPrice = 359.99;
         String itemDateAdded = "1/30/2019";
         this.product = new Product(itemName, itemURL, itemPrice, itemDateAdded);
-        this.productList = new ArrayList<>();
         this.webContent = new PriceFinder();
-        productList.add(product);
         setDefaultLookAndFeelDecorated(true);
         setLayout(new FlowLayout());
         setSize(dim);
@@ -133,6 +130,18 @@ public class Main extends JFrame {
 
     }
 
+    private void delete(ActionEvent event) {
+
+    }
+
+    private void edit(ActionEvent event) {
+
+    }
+
+    private void openWeb(ActionEvent event) {
+
+    }
+
     /**
      * Callback to be invoked when the view-page icon is clicked. Launch a
      * (default) web browser by supplying the URL of the item.
@@ -161,24 +170,12 @@ public class Main extends JFrame {
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.GRAY)));
         board.setLayout(new GridLayout(1, 1));
-        itemView = new ItemView(productList);
+        itemView = new ItemView(product);
         itemView.setClickListener(this::viewPageClicked);
         board.add(itemView);
         add(board, BorderLayout.CENTER);
         msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
         add(msgBar, BorderLayout.SOUTH);
-    }
-
-    private void delete(ActionEvent event) {
-
-    }
-
-    private void edit(ActionEvent event) {
-
-    }
-
-    private void openWeb(ActionEvent event) {
-
     }
 
     /**

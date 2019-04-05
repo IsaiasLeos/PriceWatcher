@@ -31,8 +31,8 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class ItemView extends JPanel {
 
-    private List<Product> itemList;
     private Image itemIcon;
+    private Product product;
 
     /**
      * Interface to notify a click on the view page icon.
@@ -61,8 +61,8 @@ public class ItemView extends JPanel {
      * @param itemList a list contain the current amount of Products
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public ItemView(List<Product> itemList) {
-        this.itemList = itemList;
+    public ItemView(Product product) {
+        this.product = product;
         this.itemIcon = getImage("itemIcon.png");
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(1280, 720));//Learn what this does.
@@ -98,23 +98,23 @@ public class ItemView extends JPanel {
         int x = 20, y = 0;
         g.drawImage(itemIcon, x, y, this);
         y += itemIcon.getHeight(this) + 20;
-        for (Product item : itemList) {
-            g.drawString(textAttrManipulation("Name:      ", item.getProductName(), Font.BOLD, Color.BLACK), x, y);
-            y += 20;
-            g.drawString("URL:         " + item.getProductURL(), x, y);
-            y += 20;
-            g.drawString(textAttrManipulation("Price:       ", item.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
-            y += 20;
-            float f = (float) item.getChange();
-            Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
-            if (f > 0.0) {
-                priceDropSound("play.wav");
-            }
-            g.drawString(textAttrManipulation("Change:   ", Math.abs(item.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
-            y += 20;
-            g.drawString("Added:    " + item.getAddedDate() + " (" + item.getInitialPrice() + "$)", x, y);
-            y += 80;
+
+        g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
+        y += 20;
+        g.drawString("URL:         " + product.getProductURL(), x, y);
+        y += 20;
+        g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
+        y += 20;
+        float f = (float) product.getChange();
+        Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
+        if (f > 0.0) {
+            priceDropSound("play.wav");
         }
+        g.drawString(textAttrManipulation("Change:   ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
+        y += 20;
+        g.drawString("Added:    " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
+        y += 80;
+
         g.dispose();
     }
 
