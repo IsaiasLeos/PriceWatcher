@@ -27,7 +27,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -58,6 +60,7 @@ public class Main extends JFrame {
     private ProductManager productmanager;
     private ItemView itemView;
 
+    private JPopupMenu popupmenu;
     private MouseListener mouselistener;
     private MouseEvent mouseevent;
 
@@ -91,11 +94,11 @@ public class Main extends JFrame {
 
     public void mouseListen(MouseEvent me) {
         MouseListener mouseListener = new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                JList theList = (JList) mouseEvent.getSource();
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                        System.out.println("right clicked");
-                    
+                    System.out.println("right clicked");
+                    popupmenu.show(jList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         };
@@ -211,6 +214,7 @@ public class Main extends JFrame {
         board.setLayout(new GridLayout(1, 1));
         itemView = new ItemView();
         itemView.setClickListener(this::viewPageClicked);
+        
         mouseListen(mouseevent);
         board.add(new JScrollPane(jList));
         add(board, BorderLayout.CENTER);
@@ -225,6 +229,7 @@ public class Main extends JFrame {
         panel = new JPanel();
         toolBar = new JToolBar("Toolbar");
         setJMenuBar(createJMenu());
+        createJPopupMenu();
         createJToolBar();
         menuBar.add(toolBar);
         return panel;
@@ -270,6 +275,16 @@ public class Main extends JFrame {
         double itemPrice = 359.99;
         String itemDateAdded = "1/30/2019";
         productmanager.add(new Product(itemURL, itemName, itemPrice, itemDateAdded));
+    }
+
+    private void createJPopupMenu() {
+        this.popupmenu = new JPopupMenu("Edit");
+        JMenuItem cut = new JMenuItem("Cut");
+        JMenuItem copy = new JMenuItem("Copy");
+        JMenuItem paste = new JMenuItem("Paste");
+        popupmenu.add(cut);
+        popupmenu.add(copy);
+        popupmenu.add(paste);
     }
 
     public DefaultListModel createListModel() {
