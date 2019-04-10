@@ -2,6 +2,7 @@ package view;
 
 import model.Product;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -14,14 +15,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
-import java.util.List;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 
 /**
  * A special panel to display the detail of an item.
@@ -29,7 +31,7 @@ import javax.swing.JPanel;
  * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
-public class ItemView extends JPanel {
+public class ItemView extends JPanel implements ListCellRenderer<Product> {
 
     private Image itemIcon;
     private Product product;
@@ -55,17 +57,37 @@ public class ItemView extends JPanel {
      */
     private ClickListener listener;
 
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    @Override
+    public Component getListCellRendererComponent(JList<? extends Product> list, Product value, int index, boolean isSelected, boolean cellHasFocus) {
+        setProduct(value);
+        if (isSelected) {
+            setBackground(list.getSelectionBackground());
+            setForeground(list.getSelectionForeground());
+        } else {
+            setBackground(list.getBackground());
+            setForeground(list.getForeground());
+        }
+        return this;
+    }
+
     /**
      * Create a new instance.
      *
-     * @param itemList a list contain the current amount of Products
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public ItemView(Product product) {
-        this.product = product;
-        this.itemIcon = getImage("itemIcon.png");
+    public ItemView() {
+        this.itemIcon = getImage("webbrowser.png");
+        Dimension dim = getSize();
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(1280, 720));//Learn what this does.
+        setPreferredSize(new Dimension(dim.width, 130));//Learn what this does.
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -92,13 +114,11 @@ public class ItemView extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setFont(new Font("Arial", Font.PLAIN, 16));
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
         Dimension dim = getSize();
-        System.out.println("Height: " + dim.height + "\nWidth:" + dim.width);
         int x = 20, y = 0;
         g.drawImage(itemIcon, x, y, this);
         y += itemIcon.getHeight(this) + 20;
-
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
         g.drawString("URL:         " + product.getProductURL(), x, y);
@@ -114,7 +134,6 @@ public class ItemView extends JPanel {
         y += 20;
         g.drawString("Added:    " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
         y += 80;
-
         g.dispose();
     }
 
@@ -131,9 +150,9 @@ public class ItemView extends JPanel {
      */
     private AttributedCharacterIterator textAttrManipulation(String productPrefix, String productPostfix, int font, Color color) {
         AttributedString text = new AttributedString(productPrefix + productPostfix);
-        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 16),
+        text.addAttribute(TextAttribute.FONT, new Font("Arial", Font.PLAIN, 12),
                 0, productPrefix.length() + productPostfix.length());
-        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 16),
+        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 12),
                 productPrefix.length(),
                 productPrefix.length() + productPostfix.length());
         text.addAttribute(TextAttribute.FOREGROUND, color,
@@ -163,7 +182,6 @@ public class ItemView extends JPanel {
     public Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource(RESOURCE_DIR), file);
-            System.out.println(url.toString());
             return ImageIO.read(url);
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,7 +198,6 @@ public class ItemView extends JPanel {
     @SuppressWarnings("CallToPrintStackTrace")
     private void priceDropSound(String filename) {
         try {
-            System.out.println(getClass().getResource(RESOURCE_DIR) + filename);
             URL url = new URL(getClass().getResource(RESOURCE_DIR), filename);
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
             Clip clip = AudioSystem.getClip();

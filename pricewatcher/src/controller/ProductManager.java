@@ -1,16 +1,15 @@
 package controller;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import model.Product;
 
 public class ProductManager {
 
-    private List<Product> items;
+    private List<Product> products;
 
     public ProductManager() {
-        this.items = new ArrayList<>();
+        this.products = new ArrayList<>();
     }
 
     /**
@@ -18,15 +17,15 @@ public class ProductManager {
      * @param product
      */
     public void add(Product product) {
-        this.getItems().add(product);
+        this.getProducts().add(product);
     }
 
     /**
      *
-     * @param item
+     * @param product
      */
-    public void delete(Product item) {
-        this.getItems().remove(item);
+    public void delete(Product product) {
+        this.getProducts().remove(product);
     }
 
     /**
@@ -34,21 +33,21 @@ public class ProductManager {
      * @return
      */
     public List<Product> getList() {
-        return this.getItems();
+        return this.getProducts();
     }
 
     /**
      * @return the items
      */
-    public List<Product> getItems() {
-        return Collections.unmodifiableList(items);
+    public List<Product> getProducts() {
+        return this.products;
     }
 
     /**
-     * @param items the items to set
+     * @param products
      */
-    public void setItems(List<Product> items) {
-        this.items = items;
+    public void setItems(List<Product> products) {
+        this.products = products;
     }
 
 }

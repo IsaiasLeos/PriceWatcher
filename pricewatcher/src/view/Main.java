@@ -1,27 +1,29 @@
 package view;
 
+import controller.ProductManager;
 import model.Product;
-import controller.PriceFinder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -33,28 +35,23 @@ import javax.swing.SwingUtilities;
 @SuppressWarnings("serial")
 public class Main extends JFrame {
 
+    private int time = 5;
+
+    private JLabel msgBar = new JLabel("");
+    private JPanel control;
+    private JPanel board;
+    private JPanel panel;
+    private JMenuBar menuBar;
+    private JToolBar toolBar;
+    private JList jList;
+    private DefaultListModel<Product> defaultListModel;
+
+    private final static String RESOURCE_DIR = "resources/";
+    private final static Dimension DEFAULT_SIZE = new Dimension(600, 400);
+
     private Product product;
-    private PriceFinder webContent;
-
-    /**
-     * Directory for image files: src/image.
-     */
-    private final static String RESOURCE_DIR = "/resources/";
-
-    /**
-     * Default dimension of the dialog.
-     */
-    private final static Dimension DEFAULT_SIZE = new Dimension(800, 600);
-
-    /**
-     * Special panel to display the watched item.
-     */
+    private ProductManager productmanager;
     private ItemView itemView;
-
-    /**
-     * Message bar to display various messages.
-     */
-    private final JLabel msgBar = new JLabel(" ");
 
     /**
      * Create a new dialog.
@@ -71,75 +68,94 @@ public class Main extends JFrame {
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public Main(Dimension dim) {
         super("Price Watcher");
-        String itemURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
-        String itemName = "Nintendo Switch";
-        double itemPrice = 359.99;
-        String itemDateAdded = "1/30/2019";
-        this.product = new Product(itemName, itemURL, itemPrice, itemDateAdded);
-        this.webContent = new PriceFinder();
-        setDefaultLookAndFeelDecorated(true);
-        setLayout(new FlowLayout());
+        createProductManager();
+        defaultListModel = createListModel();
+        setLayout(new BorderLayout());
         setSize(dim);
-        configureUI();
+        createUI();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setResizable(true);
-        showMessage("Welcome!");
+        showMessage("Welcome!", time);
     }
 
     /**
-     * Callback to be invoked when the refresh button is clicked. Find the
-     * current price of the watched item and display it along with a percentage
-     * price change.
+     *
+     * @param itemURL
+     * @param itemName
+     * @param itemPrice
+     * @param itemDateAdded
+     * @return
+     */
+    public Product createDefault(String itemURL, String itemName, double itemPrice, String itemDateAdded) {
+        return new Product(itemURL, itemName, itemPrice, itemDateAdded);
+    }
+
+    /**
      *
      * @param event
      */
     private void refreshButtonClicked(ActionEvent event) {
-//        System.out.println(event.toString());
-//        productList.forEach((iter) -> {
-//            iter.checkPrice(webContent.getSimulatedPrice());
-//        });
-//        super.repaint();
-//        showMessage(product.getProductPrice() + "$");
+
     }
 
+    /**
+     *
+     * @param event
+     */
     private void singleRefreshButtonClicked(ActionEvent event) {
-//        System.out.println(event.toString());
-//        productList.forEach((iter) -> {
-//            iter.checkPrice(webContent.getSimulatedPrice());
-//        });
-//        super.repaint();
-//        showMessage(product.getProductPrice() + "$");
+
     }
 
+    /**
+     *
+     * @param event
+     */
     private void addButtonClicked(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void searchButtonClicked(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void forwardButtonClicked(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void backwardButtonClicked(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void delete(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void edit(ActionEvent event) {
-
     }
 
+    /**
+     *
+     * @param event
+     */
     private void openWeb(ActionEvent event) {
-
     }
 
     /**
@@ -154,37 +170,44 @@ public class Main extends JFrame {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        showMessage("Opening Webpage");
+        showMessage("Opening Webpage", time);
     }
 
     /**
      * Configure UI.
      */
-    private void configureUI() {
+    private void createUI() {
         setLayout(new BorderLayout());
-        JPanel control = makeControlPanel();
+        control = createControlPanel();
         control.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
         add(control, BorderLayout.NORTH);
-        JPanel board = new JPanel();
+        board = new JPanel();
+        jList = createJList();
         board.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
-                BorderFactory.createLineBorder(Color.GRAY)));
+                BorderFactory.createLineBorder(Color.WHITE)));
         board.setLayout(new GridLayout(1, 1));
-        itemView = new ItemView(product);
+        itemView = new ItemView();
         itemView.setClickListener(this::viewPageClicked);
-        board.add(itemView);
+        board.add(new JScrollPane(jList));
         add(board, BorderLayout.CENTER);
-        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
+        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 0));
         add(msgBar, BorderLayout.SOUTH);
     }
 
     /**
      * Create a control panel consisting of a refresh button.
      */
-    private JPanel makeControlPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        JToolBar toolBar = new JToolBar("Toolbar");
-        panel.add(toolBar, BorderLayout.PAGE_END);
+    private JPanel createControlPanel() {
+        panel = new JPanel();
+        toolBar = new JToolBar("Toolbar");
+        setJMenuBar(createJMenu());
+        createJToolBar();
+        menuBar.add(toolBar);
+        return panel;
+    }
+
+    private void createJToolBar() {
         JButton checkmark = createButton("checkmark.png", false);
         checkmark.addActionListener(this::refreshButtonClicked);
         toolBar.add(checkmark);
@@ -213,7 +236,39 @@ public class Main extends JFrame {
         JButton edit = createButton("edit.png", false);
         edit.addActionListener(this::edit);
         toolBar.add(edit);
-        return panel;
+    }
+
+    //createDefault("https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV", "Nintendo Switch", 359.99, "1/30/2019");
+    private void createProductManager() {
+        productmanager = new ProductManager();
+    }
+
+    public DefaultListModel createListModel() {
+        DefaultListModel generatedListModel = new DefaultListModel<>();
+        productmanager.getProducts().forEach((iter) -> {
+            generatedListModel.addElement(iter);
+        });
+        return generatedListModel;
+    }
+
+    private JList createJList() {
+        JList generatedJList = new JList<>(defaultListModel);
+        generatedJList.setCellRenderer(new ItemView());
+        generatedJList.setBounds(100, 100, 75, 75);
+        return generatedJList;
+    }
+
+    private JMenuBar createJMenu() {
+        JMenuBar fileMenuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("App");
+        JMenu editMenu = new JMenu("Item");
+        final JMenu aboutMenu = new JMenu("Sort");
+        setJMenuBar(fileMenuBar);
+        fileMenuBar.add(fileMenu);
+        fileMenuBar.add(editMenu);
+        fileMenuBar.add(aboutMenu);
+        menuBar = fileMenuBar;
+        return menuBar;
     }
 
     /**
@@ -225,7 +280,7 @@ public class Main extends JFrame {
      */
     private JButton createButton(String label, boolean enabled) {
         JButton button = new JButton(new ImageIcon(getClass().getClassLoader()
-                .getResource("resources/" + label)));
+                .getResource(RESOURCE_DIR + label)));
         button.setFocusPainted(enabled);
         return button;
     }
@@ -235,12 +290,13 @@ public class Main extends JFrame {
      *
      * @param msg
      */
-    private void showMessage(String msg) {
+    private void showMessage(String msg, int time) {
         msgBar.setText(msg);
         new Thread(() -> {
             try {
-                Thread.sleep(3 * 1000); // 3 seconds
+                Thread.sleep(time * 1000); // x seconds
             } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             if (msg.equals(msgBar.getText())) {
                 SwingUtilities.invokeLater(() -> msgBar.setText(" "));
@@ -255,4 +311,5 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         Main main = new Main();
     }
+
 }

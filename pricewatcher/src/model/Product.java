@@ -26,7 +26,7 @@ public class Product {
      * @param initialPrice price when first added
      * @param addedDate date product was added
      */
-    public Product(String productName, String currentURL, double initialPrice, String addedDate) {
+    public Product(String currentURL, String productName, double initialPrice, String addedDate) {
         this.productURL = currentURL;
         this.productName = productName;
         this.initialPrice = initialPrice;
