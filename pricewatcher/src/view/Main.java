@@ -8,14 +8,13 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import static java.nio.file.Files.list;
-import static java.util.Collections.list;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -31,7 +30,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 /**
@@ -205,17 +206,16 @@ public class Main extends JFrame {
         setLayout(new BorderLayout());
         control = createControlPanel();
         control.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
-        add(control, BorderLayout.NORTH);
+        add(control, BorderLayout.CENTER);
         board = new JPanel();
         jList = createJList();
         board.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.WHITE)));
         board.setLayout(new GridLayout(1, 1));
+        mouseListen(mouseevent);
         itemView = new ItemView();
         itemView.setClickListener(this::viewPageClicked);
-        
-        mouseListen(mouseevent);
         board.add(new JScrollPane(jList));
         add(board, BorderLayout.CENTER);
         msgBar.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 0));
@@ -228,10 +228,10 @@ public class Main extends JFrame {
     private JPanel createControlPanel() {
         panel = new JPanel();
         toolBar = new JToolBar("Toolbar");
-        setJMenuBar(createJMenu());
+        createJMenu();
         createJPopupMenu();
         createJToolBar();
-        menuBar.add(toolBar);
+        add(toolBar, BorderLayout.NORTH);
         return panel;
     }
 
@@ -302,17 +302,43 @@ public class Main extends JFrame {
         return generatedJList;
     }
 
-    private JMenuBar createJMenu() {
+    private void createJMenu() {
         JMenuBar fileMenuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("App");
         JMenu editMenu = new JMenu("Item");
-        final JMenu aboutMenu = new JMenu("Sort");
-        setJMenuBar(fileMenuBar);
+        JMenu sortMenu = new JMenu("Sort");
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem check = createMenutItem("Check Prices", KeyEvent.VK_E, ActionEvent.ALT_MASK, "checkmark.png");
+        check.addActionListener(this::addButtonClicked);
+        editMenu.add(check);
+        JMenuItem add = createMenutItem("Add", KeyEvent.VK_A, ActionEvent.ALT_MASK, "add.png");
+        add.addActionListener(this::addButtonClicked);
+        editMenu.add(add);
+        JMenuItem edit = createMenutItem("Edit", KeyEvent.VK_E, ActionEvent.ALT_MASK, "edit.png");
+        edit.addActionListener(this::addButtonClicked);
+        editMenu.add(edit);
+        edit.add(new JSeparator());
+        JMenuItem search = createMenutItem("Search", KeyEvent.VK_S, ActionEvent.ALT_MASK, "search.png");
+        search.addActionListener(this::addButtonClicked);
+        editMenu.add(search);
+        JMenuItem forward = createMenutItem("Forward", KeyEvent.VK_RIGHT, ActionEvent.ALT_MASK, "forward.png");
+        forward.addActionListener(this::addButtonClicked);
+        editMenu.add(forward);
+        JMenuItem backward = createMenutItem("Backwards", KeyEvent.VK_LEFT, ActionEvent.ALT_MASK, "backward.png");
+        backward.addActionListener(this::addButtonClicked);
+        editMenu.add(backward);
         fileMenuBar.add(fileMenu);
         fileMenuBar.add(editMenu);
+        fileMenuBar.add(sortMenu);
         fileMenuBar.add(aboutMenu);
         menuBar = fileMenuBar;
-        return menuBar;
+        setJMenuBar(menuBar);
+    }
+
+    private JMenuItem createMenutItem(String label, int key, int mask, String iconLabel) {
+        JMenuItem menuItem = new JMenuItem(label);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(key, mask));
+        return menuItem;
     }
 
     /**
