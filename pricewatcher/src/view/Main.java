@@ -8,9 +8,14 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import static java.nio.file.Files.list;
+import static java.util.Collections.list;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -53,6 +58,9 @@ public class Main extends JFrame {
     private ProductManager productmanager;
     private ItemView itemView;
 
+    private MouseListener mouselistener;
+    private MouseEvent mouseevent;
+
     /**
      * Create a new dialog.
      */
@@ -79,6 +87,19 @@ public class Main extends JFrame {
         setVisible(true);
         setResizable(true);
         showMessage("Welcome!", time);
+    }
+
+    public void mouseListen(MouseEvent me) {
+        MouseListener mouseListener = new MouseAdapter() {
+            public void mouseClicked(MouseEvent mouseEvent) {
+                JList theList = (JList) mouseEvent.getSource();
+                if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+                        System.out.println("right clicked");
+                    
+                }
+            }
+        };
+        jList.addMouseListener(mouseListener);
     }
 
     /**
@@ -175,6 +196,7 @@ public class Main extends JFrame {
 
     /**
      * Configure UI.
+     *
      */
     private void createUI() {
         setLayout(new BorderLayout());
@@ -189,6 +211,7 @@ public class Main extends JFrame {
         board.setLayout(new GridLayout(1, 1));
         itemView = new ItemView();
         itemView.setClickListener(this::viewPageClicked);
+        mouseListen(mouseevent);
         board.add(new JScrollPane(jList));
         add(board, BorderLayout.CENTER);
         msgBar.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 0));
@@ -241,6 +264,12 @@ public class Main extends JFrame {
     //createDefault("https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV", "Nintendo Switch", 359.99, "1/30/2019");
     private void createProductManager() {
         productmanager = new ProductManager();
+        productmanager = new ProductManager();
+        String itemURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
+        String itemName = "Nintendo Switch";
+        double itemPrice = 359.99;
+        String itemDateAdded = "1/30/2019";
+        productmanager.add(new Product(itemURL, itemName, itemPrice, itemDateAdded));
     }
 
     public DefaultListModel createListModel() {
