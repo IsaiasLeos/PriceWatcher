@@ -4,10 +4,15 @@ import controller.PriceFinder;
 import controller.ProductManager;
 import model.Product;
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -35,6 +40,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 /**
@@ -67,6 +74,9 @@ public class Main extends JFrame {
     private MouseListener mouselistener;
     private MouseEvent mouseevent;
     private PriceFinder webPrice;
+    
+    private JFrame frame = new JFrame("Edit");
+    
 
     /**
      * Create a new dialog.
@@ -85,6 +95,7 @@ public class Main extends JFrame {
         super("Price Watcher");
         createProductManager();
         defaultListModel = createListModel();
+        webPrice = new PriceFinder();
         setLayout(new BorderLayout());
         setSize(dim);
         createUI();
@@ -125,6 +136,11 @@ public class Main extends JFrame {
      * @param event
      */
     private void refreshButtonClicked(ActionEvent event) {
+        for (int i = 0; i < defaultListModel.getSize(); i++) {
+            defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice());
+        }
+        repaint();
+
     }
 
     /**
@@ -132,7 +148,10 @@ public class Main extends JFrame {
      * @param event
      */
     private void singleRefreshButtonClicked(ActionEvent event) {
-
+        if (jList.getSelectedIndex() > -1) {
+            defaultListModel.get(jList.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice());
+        }
+        repaint();
     }
 
     /**
@@ -140,6 +159,29 @@ public class Main extends JFrame {
      * @param event
      */
     private void addButtonClicked(ActionEvent event) {
+        JTextField name = new JTextField();
+        JTextField url = new JTextField();
+        JTextField price = new JTextField();
+        Object[] message = {
+            "Product Name:", name,
+            "Product URL:", url,
+            "Product Price:", price
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
+        System.out.println(option);
+        //OK
+        if (option == 0) {
+            Product generatedProduct = createDefault(url.getText(), name.getText(), Double.parseDouble(price.getText()), "");
+            defaultListModel.addElement(generatedProduct);
+        }
+        //Close Button
+        if (option == -1) {
+
+        }
+        //Cancel
+        if (option == 2) {
+
+        }
     }
 
     /**
@@ -149,11 +191,14 @@ public class Main extends JFrame {
     private void searchButtonClicked(ActionEvent event) {
     }
 
-    /**
+   /**
      *
      * @param event
      */
     private void forwardButtonClicked(ActionEvent event) {
+        if (jList.getSelectedIndex() < defaultListModel.getSize()) {
+            jList.setSelectedIndex(jList.getSelectedIndex() + 1);
+        }
     }
 
     /**
@@ -161,20 +206,53 @@ public class Main extends JFrame {
      * @param event
      */
     private void backwardButtonClicked(ActionEvent event) {
+        if (jList.getSelectedIndex() > -1) {
+            jList.setSelectedIndex(jList.getSelectedIndex() - 1);
+        }
     }
-
     /**
      *
      * @param event
      */
     private void delete(ActionEvent event) {
+      if (jList.getSelectedIndex() > -1) {
+          productmanager.delete(defaultListModel.remove(jList.getSelectedIndex()));
+          
+      }
     }
 
     /**
      *
      * @param event
      */
-    private void edit(ActionEvent event) {
+     private void edit(ActionEvent event) {
+        Product generatedProduct = defaultListModel.get(jList.getSelectedIndex());
+        JTextField name = new JTextField(generatedProduct.getProductName());
+        JTextField url = new JTextField(generatedProduct.getProductURL(), 5);
+        JTextField price = new JTextField("" + (generatedProduct.getInitialPrice()));
+        Object[] message = {
+            "Product Name:", name,
+            "Product URL:", url,
+            "Product Price:", price
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
+        if (option == 0) {
+            productmanager.delete(product);
+            defaultListModel.get(jList.getSelectedIndex()).setProductName(name.getText());
+            defaultListModel.get(jList.getSelectedIndex()).setCurrentURL(url.getText());
+            defaultListModel.get(jList.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
+            defaultListModel.get(jList.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
+            this.productmanager.add(product);
+            repaint();
+        }
+        //Close Button
+        if (option == -1) {
+
+        }
+        //Cancel
+        if (option == 2) {
+
+        }
     }
 
     /**
@@ -182,6 +260,16 @@ public class Main extends JFrame {
      * @param event
      */
     private void openWeb(ActionEvent event) {
+        if (jList.getSelectedIndex() > -1) {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jList.getSelectedIndex()).getProductURL()));
+                } catch (URISyntaxException | IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            showMessage("Opening Webpage", time);
+        }
     }
 
     /**
@@ -244,6 +332,7 @@ public class Main extends JFrame {
      * Callback to be invoked when the view-page icon is clicked. Launch a
      * (default) web browser by supplying the URL of the item.
      */
+    @Deprecated
     private void viewPageClicked() {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
@@ -330,12 +419,15 @@ public class Main extends JFrame {
     //createDefault("https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV", "Nintendo Switch", 359.99, "1/30/2019");
     private void createProductManager() {
         productmanager = new ProductManager();
-        productmanager = new ProductManager();
         String itemURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
         String itemName = "Nintendo Switch";
         double itemPrice = 359.99;
         String itemDateAdded = "1/30/2019";
         productmanager.add(new Product(itemURL, itemName, itemPrice, itemDateAdded));
+        productmanager.add(new Product(itemURL, itemName, itemPrice, itemDateAdded));
+        productmanager.add(new Product(itemURL, itemName, itemPrice, itemDateAdded));
+        
+        
     }
 
     private void createJPopupMenu() {
