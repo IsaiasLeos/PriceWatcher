@@ -17,6 +17,7 @@ public class Product {
     private double productPrice;
     private double change;
     private double initialPrice;
+    private int sound = -1;
 
     /**
      * Alternative constructor for the product with given information.
@@ -49,6 +50,7 @@ public class Product {
         setProductPrice(newPrice);
         setChange(new BigDecimal(calculateProductChange(getInitialPrice(),
                 getProductPrice())).setScale(2, RoundingMode.CEILING).doubleValue());
+        sound = 1;
     }
 
     /**
@@ -60,6 +62,22 @@ public class Product {
      */
     private double calculateProductChange(double newPrice, double initialPrice) {
         return ((newPrice - initialPrice) / initialPrice) * 100;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getSound() {
+        return sound;
+    }
+
+    /**
+     *
+     * @param sound
+     */
+    public void setSound(int sound) {
+        this.sound = sound;
     }
 
     /**

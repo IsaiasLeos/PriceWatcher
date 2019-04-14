@@ -8,8 +8,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.net.URL;
@@ -35,35 +33,12 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
 
     private Image itemIcon;
     private Product product;
-
-    /**
-     * Interface to notify a click on the view page icon.
-     */
-    public interface ClickListener {
-
-        /**
-         * Callback to be invoked when the view page icon is clicked.
-         */
-        void clicked();
-    }
+    private Color change;
 
     /**
      * Directory for image files: src/image.
      */
     private final static String RESOURCE_DIR = "/resources/";
-
-    /**
-     * View-page clicking listener.
-     */
-    private ClickListener listener;
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
 
     @Override
     public Component getListCellRendererComponent(JList<? extends Product> list, Product value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -79,6 +54,22 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
     }
 
     /**
+     *
+     * @return
+     */
+    public Product getProduct() {
+        return product;
+    }
+
+    /**
+     *
+     * @param product
+     */
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    /**
      * Create a new instance.
      *
      */
@@ -87,36 +78,20 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         this.itemIcon = getImage("webbrowser.png");
         Dimension dim = getSize();
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(dim.width, 130));//Learn what this does.
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (listener != null && isViewPageClicked(e.getX(), e.getY())) {
-                    listener.clicked();
-                }
-            }
-        });
-    }
-
-    /**
-     * Set the view-page click listener.
-     *
-     * @param listener
-     */
-    public void setClickListener(ClickListener listener) {
-        this.listener = listener;
+        setPreferredSize(new Dimension(dim.width, 150));//Learn what this does.
     }
 
     /**
      * Display the details of an item list within the ItemView Panel. Overridden
      * here to display the details of the item.
      */
-    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (product.getSound() == -1) {
+            change = Color.BLACK;
+        }
         g.setFont(new Font("Arial", Font.PLAIN, 12));
-        Dimension dim = getSize();
-        int x = 20, y = 0;
+        int x = 20, y = 10;
         g.drawImage(itemIcon, x, y, this);
         y += itemIcon.getHeight(this) + 20;
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
@@ -125,14 +100,17 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         y += 20;
         g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
         y += 20;
-        float f = (float) product.getChange();
-        Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
-        if (f > 0.0) {
-            priceDropSound("play.wav");
+        if (product.getSound() == 1) {
+            float f = (float) product.getChange();
+            change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
+            if (f > 0.0) {
+                priceDropSound("play.wav");
+            }
+            product.setSound(0);
         }
-        g.drawString(textAttrManipulation("Change:   ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
+        g.drawString(textAttrManipulation("Change:  ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
         y += 20;
-        g.drawString("Added:    " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
+        g.drawString("Added:     " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
         y += 80;
         g.dispose();
     }
@@ -167,9 +145,19 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
      * @param y y-coordinate of the mouse pointer
      * @return true if the given screen coordinate is inside the viewPage icon.
      */
-    private boolean isViewPageClicked(int x, int y) {
+    private boolean isImageClicked(int x, int y) {
         return new Rectangle(20, 0, itemIcon.getHeight(this),
                 itemIcon.getWidth(this)).contains(x, y);
+    }
+
+    /**
+     *
+     * @param x x-coordinate of the mouse pointer
+     * @param y y-coordinate of the mouse pointer
+     * @return true if the given screen coordinate is inside the viewPage icon.
+     */
+    public boolean getIsImageClicked(int x, int y) {
+        return isImageClicked(x, y);
     }
 
     /**
