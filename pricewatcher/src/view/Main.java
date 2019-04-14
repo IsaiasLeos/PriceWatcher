@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -78,6 +76,7 @@ public class Main extends JFrame {
     private JPopupMenu popupmenu;
     private MouseEvent mouseevent;
     private PriceFinder webPrice;
+    private JMenu nestedMenu;
 
     /**
      * Create a new dialog.
@@ -138,8 +137,8 @@ public class Main extends JFrame {
     private JPanel createControlPanel() {
         panel = new JPanel();
         toolBar = new JToolBar("Toolbar");
-        createJMenu();
         createJPopupMenu();
+        createJMenu();
         createJToolBar();
         add(toolBar, BorderLayout.NORTH);
         return panel;
@@ -528,17 +527,17 @@ public class Main extends JFrame {
         JMenuItem remove = createMenutItem("Remove");
         remove.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
         remove.addActionListener((event) -> this.deleteButtonClicked(event));
-        popupmenu.add(price);
-        popupmenu.add(view);
-        popupmenu.add(edit);
-        popupmenu.add(remove);
-        popupmenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.copyToClipboard("name"));
         JMenuItem curl = new JMenuItem("Copy URL");
         curl.addActionListener((event) -> this.copyToClipboard("url"));
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.copyToClipboard("item"));
+        popupmenu.add(price);
+        popupmenu.add(view);
+        popupmenu.add(edit);
+        popupmenu.add(remove);
+        popupmenu.addSeparator();
         popupmenu.add(cname);
         popupmenu.add(curl);
         popupmenu.add(citem);
@@ -577,7 +576,7 @@ public class Main extends JFrame {
         JMenu sortMenu = new JMenu("Sort");
         JMenuItem about = createMenutItem("About", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
         about.addActionListener((event) -> this.aboutButtonClicked(event));
-        about.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
+        about.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "about.png")));
         appMenu.add(about);
         JMenuItem exit = createMenutItem("Exit", KeyEvent.VK_X, ActionEvent.ALT_MASK);
         exit.addActionListener((event) -> this.exitButtonClicked(event));
@@ -630,6 +629,8 @@ public class Main extends JFrame {
         sortMenu.add(high);
         JMenuItem priceChange = new JRadioButtonMenuItem("Price Change (%)");
         priceChange.addActionListener((event) -> this.sortChange(event));
+        createNestedJMenu();
+        editMenu.add(nestedMenu);
         sortMenu.add(priceChange);
         fileMenuBar.add(appMenu);
         fileMenuBar.add(editMenu);
@@ -638,29 +639,64 @@ public class Main extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    private void createNestedJMenu() {
+        JMenu nestedMenu = new JMenu("Selected");
+        JMenuItem price = createMenutItem("Price");
+        price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
+        price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
+        JMenuItem view = createMenutItem("View");
+        view.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "webbrowser.png")));
+        view.addActionListener((event) -> this.openWeb(event));
+        JMenuItem edit = createMenutItem("Edit");
+        edit.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
+        edit.addActionListener((event) -> this.editButtonClicked(event));
+        JMenuItem remove = createMenutItem("Remove");
+        remove.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
+        remove.addActionListener((event) -> this.deleteButtonClicked(event));
+        JMenuItem cname = new JMenuItem("Copy Name");
+        cname.addActionListener((event) -> this.copyToClipboard("name"));
+        JMenuItem curl = new JMenuItem("Copy URL");
+        curl.addActionListener((event) -> this.copyToClipboard("url"));
+        JMenuItem citem = new JMenuItem("Copy Item");
+        citem.addActionListener((event) -> this.copyToClipboard("item"));
+        nestedMenu.add(price);
+        nestedMenu.add(view);
+        nestedMenu.add(edit);
+        nestedMenu.add(remove);
+        nestedMenu.addSeparator();
+        nestedMenu.add(cname);
+        nestedMenu.add(curl);
+        nestedMenu.add(citem);
+        this.nestedMenu = nestedMenu;
+    }
+
     /**
      *
      * @param copyTo
      */
     private void copyToClipboard(String copyTo) {
-        StringSelection selection = new StringSelection("");
-        Clipboard clipboard;
-        if (copyTo.equalsIgnoreCase("name")) {
-            selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
-        } else if (copyTo.equalsIgnoreCase("url")) {
-            selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
-        } else if (copyTo.equalsIgnoreCase("item")) {
-            Product toClipboard = defaultListModel.get(jList.getSelectedIndex());
-            selection = new StringSelection(
-                    "Name:  " + toClipboard.getProductName() + "\n"
-                    + "URL:  " + toClipboard.getProductURL() + "\n"
-                    + "Price:  " + toClipboard.getProductPrice() + "\n"
-                    + "Change:  " + toClipboard.getChange() + "\n"
-                    + "Date Added:  " + toClipboard.getAddedDate() + "\n"
-            );
+        if (jList.getSelectedIndex() > -1) {
+            StringSelection selection = new StringSelection("");
+            Clipboard clipboard;
+            if (copyTo.equalsIgnoreCase("name")) {
+                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
+            } else if (copyTo.equalsIgnoreCase("url")) {
+                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
+            } else if (copyTo.equalsIgnoreCase("item")) {
+                Product toClipboard = defaultListModel.get(jList.getSelectedIndex());
+                selection = new StringSelection(
+                        "Name:  " + toClipboard.getProductName() + "\n"
+                        + "URL:  " + toClipboard.getProductURL() + "\n"
+                        + "Price:  " + toClipboard.getProductPrice() + "\n"
+                        + "Change:  " + toClipboard.getChange() + "\n"
+                        + "Date Added:  " + toClipboard.getAddedDate() + "\n"
+                );
+            }
+            clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(selection, selection);
+        } else {
+            showMessage("Not Selecting an Item", time);
         }
-        clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(selection, selection);
     }
 
     /**
@@ -673,6 +709,7 @@ public class Main extends JFrame {
     private JMenuItem createMenutItem(String label, int key, int mask) {
         JMenuItem menuItem = new JMenuItem(label);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(key, mask));
+        menuItem.setMnemonic(mask);
         menuItem.setRolloverEnabled(true);
         return menuItem;
     }
