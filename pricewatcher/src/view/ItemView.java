@@ -31,7 +31,7 @@ import javax.swing.ListCellRenderer;
 @SuppressWarnings("serial")
 public class ItemView extends JPanel implements ListCellRenderer<Product> {
 
-    private Image itemIcon;
+    private Image itemImage;
     private Product product;
     private Color change;
 
@@ -70,21 +70,38 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
     }
 
     /**
+     *
+     * @return
+     */
+    public Image getItemImage() {
+        return itemImage;
+    }
+
+    /**
+     *
+     * @param itemIcon
+     */
+    public void setItemImage(Image itemIcon) {
+        this.itemImage = itemIcon;
+    }
+
+    /**
      * Create a new instance.
      *
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public ItemView() {
-        this.itemIcon = getImage("webbrowser.png");
+        setItemImage(getImage("webbrowser.png"));
         Dimension dim = getSize();
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(dim.width, 150));//Learn what this does.
+        setPreferredSize(new Dimension(dim.width, 160));//Learn what this does.
     }
 
     /**
      * Display the details of an item list within the ItemView Panel. Overridden
      * here to display the details of the item.
      */
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (product.getSound() == -1) {
@@ -92,8 +109,9 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         }
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         int x = 20, y = 10;
-        g.drawImage(itemIcon, x, y, this);
-        y += itemIcon.getHeight(this) + 20;
+        System.out.println(x + " " + y);
+        g.drawImage(itemImage, x, y, this);
+        y += 24 + 20;
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
         g.drawString("URL:         " + product.getProductURL(), x, y);
@@ -146,8 +164,7 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
      * @return true if the given screen coordinate is inside the viewPage icon.
      */
     private boolean isImageClicked(int x, int y) {
-        return new Rectangle(20, 0, itemIcon.getHeight(this),
-                itemIcon.getWidth(this)).contains(x, y);
+        return new Rectangle(20, 10, 24, 24).contains(x, y);
     }
 
     /**
@@ -156,7 +173,7 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
      * @param y y-coordinate of the mouse pointer
      * @return true if the given screen coordinate is inside the viewPage icon.
      */
-    public boolean getIsImageClicked(int x, int y) {
+    public boolean imageClicked(int x, int y) {
         return isImageClicked(x, y);
     }
 

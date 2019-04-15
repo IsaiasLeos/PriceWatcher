@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -16,6 +17,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
@@ -64,6 +66,10 @@ public class Main extends JFrame {
     private JToolBar toolBar;
     private JList jList;
     private JScrollPane jscrollpane;
+    private JPopupMenu popupmenu;
+    private MouseEvent mouseevent;
+    private JMenu nestedMenu;
+
     private DefaultListModel<Product> defaultListModel;
 
     private final static String RESOURCE_DIR = "resources/";
@@ -72,11 +78,7 @@ public class Main extends JFrame {
     private Product product;
     private ProductManager productmanager;
     private ItemView itemView;
-
-    private JPopupMenu popupmenu;
-    private MouseEvent mouseevent;
     private PriceFinder webPrice;
-    private JMenu nestedMenu;
 
     /**
      * Create a new dialog.
@@ -123,12 +125,13 @@ public class Main extends JFrame {
                 BorderFactory.createLineBorder(Color.WHITE)));
         board.setLayout(new GridLayout(1, 1));
         mouseListener(mouseevent);
-        itemView = new ItemView();
+        mouseMotionListener(mouseevent);
         jscrollpane = new JScrollPane(jList);
         board.add(jscrollpane);
         add(board, BorderLayout.CENTER);
         msgBar.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 0));
         add(msgBar, BorderLayout.SOUTH);
+
     }
 
     /**
@@ -163,19 +166,40 @@ public class Main extends JFrame {
         }).start();
     }
 
-    private void mouseListener(MouseEvent me) {
+    private void mouseListener(MouseEvent mouseEvent) {
         MouseListener mouseListener = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
                     popupmenu.show(jList, mouseEvent.getX(), mouseEvent.getY());
                 }
-                if (SwingUtilities.isLeftMouseButton(mouseEvent) && itemView.getIsImageClicked(mouseEvent.getX(), mouseEvent.getY())) {
+                if (SwingUtilities.isLeftMouseButton(mouseEvent) && itemView.imageClicked(mouseEvent.getX(), mouseEvent.getY())) {
                     openWeb(mouseEvent);
                 }
             }
         };
         jList.addMouseListener(mouseListener);
+    }
+
+    private void mouseMotionListener(MouseEvent mouseEvent) {
+        MouseMotionListener mouseMotion = new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (itemView.imageClicked(e.getX(), e.getY())) {
+                    itemView.setItemImage(itemView.getImage("webbrowserbig.png"));
+                    repaint();
+                } else {
+                    itemView.setItemImage(itemView.getImage("webbrowser.png"));
+                    repaint();
+                }
+            }
+        };
+        jList.addMouseMotionListener(mouseMotion);
     }
 
     /**
@@ -364,8 +388,10 @@ public class Main extends JFrame {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 try {
                     Desktop.getDesktop().browse(new URI(defaultListModel.get(jList.getSelectedIndex()).getProductURL()));
+
                 } catch (URISyntaxException | IOException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Main.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
             showMessage("Opening Webpage", time);
@@ -383,8 +409,10 @@ public class Main extends JFrame {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 try {
                     Desktop.getDesktop().browse(new URI(defaultListModel.get(jList.getSelectedIndex()).getProductURL()));
+
                 } catch (URISyntaxException | IOException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Main.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
             showMessage("Opening Webpage", time);
@@ -561,7 +589,8 @@ public class Main extends JFrame {
      */
     private JList createJList() {
         JList generatedJList = new JList<>(defaultListModel);
-        generatedJList.setCellRenderer(new ItemView());
+        itemView = new ItemView();
+        generatedJList.setCellRenderer(itemView);
         generatedJList.setBounds(100, 100, 75, 75);
         return generatedJList;
     }
@@ -640,7 +669,7 @@ public class Main extends JFrame {
     }
 
     private void createNestedJMenu() {
-        JMenu nestedMenu = new JMenu("Selected");
+        JMenu generatedNestedMenu = new JMenu("Selected");
         JMenuItem price = createMenutItem("Price");
         price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
@@ -659,15 +688,15 @@ public class Main extends JFrame {
         curl.addActionListener((event) -> this.copyToClipboard("url"));
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.copyToClipboard("item"));
-        nestedMenu.add(price);
-        nestedMenu.add(view);
-        nestedMenu.add(edit);
-        nestedMenu.add(remove);
-        nestedMenu.addSeparator();
-        nestedMenu.add(cname);
-        nestedMenu.add(curl);
-        nestedMenu.add(citem);
-        this.nestedMenu = nestedMenu;
+        generatedNestedMenu.add(price);
+        generatedNestedMenu.add(view);
+        generatedNestedMenu.add(edit);
+        generatedNestedMenu.add(remove);
+        generatedNestedMenu.addSeparator();
+        generatedNestedMenu.add(cname);
+        generatedNestedMenu.add(curl);
+        generatedNestedMenu.add(citem);
+        this.nestedMenu = generatedNestedMenu;
     }
 
     /**
