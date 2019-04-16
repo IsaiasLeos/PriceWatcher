@@ -185,4 +185,5 @@ public class Product {
     public void setInitialPrice(double initialPrice) {
         this.initialPrice = initialPrice;
     }
+
 }

@@ -109,7 +109,6 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         }
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         int x = 20, y = 10;
-        System.out.println(x + " " + y);
         g.drawImage(itemImage, x, y, this);
         y += 24 + 20;
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);

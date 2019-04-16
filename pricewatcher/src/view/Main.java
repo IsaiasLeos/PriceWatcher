@@ -65,9 +65,9 @@ public class Main extends JFrame {
     private JMenuBar menuBar;
     private JToolBar toolBar;
     private JList jList;
-    private JScrollPane jscrollpane;
-    private JPopupMenu popupmenu;
-    private MouseEvent mouseevent;
+    private JScrollPane jScrollPane;
+    private JPopupMenu popupMenu;
+    private MouseEvent mouseEvent;
     private JMenu nestedMenu;
 
     private DefaultListModel<Product> defaultListModel;
@@ -76,7 +76,8 @@ public class Main extends JFrame {
     private final static Dimension DEFAULT_SIZE = new Dimension(600, 400);
 
     private Product product;
-    private ProductManager productmanager;
+    private ProductManager originalProductManager;
+    private ProductManager backUpProductManager;
     private ItemView itemView;
     private PriceFinder webPrice;
 
@@ -96,8 +97,6 @@ public class Main extends JFrame {
     public Main(Dimension dim) {
         super("Price Watcher");
         createDefaultProduct();
-        defaultListModel = createListModel();
-        webPrice = new PriceFinder();
         setLayout(new BorderLayout());
         setSize(dim);
         createUI();
@@ -114,24 +113,22 @@ public class Main extends JFrame {
      *
      */
     private void createUI() {
-        setLayout(new BorderLayout());
         control = createControlPanel();
         control.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
         add(control, BorderLayout.CENTER);
         board = new JPanel();
         jList = createJList();
+        mouseListener(mouseEvent);
+        mouseMotionListener(mouseEvent);
+        jScrollPane = new JScrollPane(jList);
+        board.add(jScrollPane);
         board.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.WHITE)));
         board.setLayout(new GridLayout(1, 1));
-        mouseListener(mouseevent);
-        mouseMotionListener(mouseevent);
-        jscrollpane = new JScrollPane(jList);
-        board.add(jscrollpane);
         add(board, BorderLayout.CENTER);
-        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 0));
+        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
         add(msgBar, BorderLayout.SOUTH);
-
     }
 
     /**
@@ -156,7 +153,7 @@ public class Main extends JFrame {
         msgBar.setText(msg);
         new Thread(() -> {
             try {
-                Thread.sleep(time * 1000); // x seconds
+                Thread.sleep(time * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -171,7 +168,7 @@ public class Main extends JFrame {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    popupmenu.show(jList, mouseEvent.getX(), mouseEvent.getY());
+                    popupMenu.show(jList, mouseEvent.getX(), mouseEvent.getY());
                 }
                 if (SwingUtilities.isLeftMouseButton(mouseEvent) && itemView.imageClicked(mouseEvent.getX(), mouseEvent.getY())) {
                     openWeb(mouseEvent);
@@ -218,12 +215,17 @@ public class Main extends JFrame {
      *
      */
     private void createDefaultProduct() {
-        productmanager = new ProductManager();
+        originalProductManager = new ProductManager();
         String productURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
         String productName = "Nintendo Switch";
         double productInitialPrice = 359.99;
         String productDateAdded = "1/30/2019";
-        productmanager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        originalProductManager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        originalProductManager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        originalProductManager.add(createProduct("https://www.google.com", "Google", 69999.99, "9/30/2019"));
+        originalProductManager.add(createProduct("https://www.google.com", "Google", 69999.99, "9/30/2019"));
+        defaultListModel = createListModel(originalProductManager);
+        webPrice = new PriceFinder();
     }
 
     /**
@@ -305,6 +307,7 @@ public class Main extends JFrame {
      * @param event
      */
     private void searchButtonClicked(ActionEvent event) {
+        
     }
 
     /**
@@ -334,7 +337,8 @@ public class Main extends JFrame {
      */
     private void deleteButtonClicked(ActionEvent event) {
         if (jList.getSelectedIndex() > -1) {
-            productmanager.delete(defaultListModel.remove(jList.getSelectedIndex()));
+            defaultListModel.remove(jList.getSelectedIndex());
+            repaint();
         } else {
             showMessage("Not Selecting an Item", time);
         }
@@ -357,12 +361,12 @@ public class Main extends JFrame {
             };
             int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
             if (option == 0) {
-                productmanager.delete(product);
+                originalProductManager.delete(product);
                 defaultListModel.get(jList.getSelectedIndex()).setProductName(name.getText());
                 defaultListModel.get(jList.getSelectedIndex()).setCurrentURL(url.getText());
                 defaultListModel.get(jList.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
                 defaultListModel.get(jList.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
-                this.productmanager.add(product);
+                this.originalProductManager.add(product);
                 repaint();
                 showMessage("Succesfully Edited a Product", time);
             }
@@ -542,7 +546,7 @@ public class Main extends JFrame {
      *
      */
     private void createJPopupMenu() {
-        this.popupmenu = new JPopupMenu();
+        this.popupMenu = new JPopupMenu();
         JMenuItem price = createMenutItem("Price");
         price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
@@ -561,23 +565,24 @@ public class Main extends JFrame {
         curl.addActionListener((event) -> this.copyToClipboard("url"));
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.copyToClipboard("item"));
-        popupmenu.add(price);
-        popupmenu.add(view);
-        popupmenu.add(edit);
-        popupmenu.add(remove);
-        popupmenu.addSeparator();
-        popupmenu.add(cname);
-        popupmenu.add(curl);
-        popupmenu.add(citem);
+        popupMenu.add(price);
+        popupMenu.add(view);
+        popupMenu.add(edit);
+        popupMenu.add(remove);
+        popupMenu.addSeparator();
+        popupMenu.add(cname);
+        popupMenu.add(curl);
+        popupMenu.add(citem);
     }
 
     /**
      *
+     * @param originalProductManager
      * @return
      */
-    public DefaultListModel createListModel() {
+    public DefaultListModel createListModel(ProductManager originalProductManager) {
         DefaultListModel generatedListModel = new DefaultListModel<>();
-        productmanager.getProducts().forEach((iter) -> {
+        originalProductManager.getProducts().forEach((iter) -> {
             generatedListModel.addElement(iter);
         });
         return generatedListModel;
@@ -710,7 +715,7 @@ public class Main extends JFrame {
             if (copyTo.equalsIgnoreCase("name")) {
                 selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
             } else if (copyTo.equalsIgnoreCase("url")) {
-                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
+                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductURL());
             } else if (copyTo.equalsIgnoreCase("item")) {
                 Product toClipboard = defaultListModel.get(jList.getSelectedIndex());
                 selection = new StringSelection(
