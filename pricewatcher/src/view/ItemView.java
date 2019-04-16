@@ -3,16 +3,23 @@ package view;
 import model.Product;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -33,12 +40,42 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
 
     private Image itemImage;
     private Product product;
-    private Color change;
+
+    /**
+     * View-page clicking listener.
+     */
+    private ClickListener listener;
 
     /**
      * Directory for image files: src/image.
      */
     private final static String RESOURCE_DIR = "/resources/";
+
+    /**
+     * Create a new instance.
+     *
+     */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
+    public ItemView() {
+        setItemImage(getImage("webbrowser.png"));
+        Dimension dim = getSize();
+        setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(dim.width, 160));//Learn what this does.
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+        });
+    }
+
+    public interface ClickListener {
+
+        /**
+         * Callback to be invoked when the view page icon is clicked.
+         */
+        void clicked();
+    }
 
     @Override
     public Component getListCellRendererComponent(JList<? extends Product> list, Product value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -53,48 +90,25 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
-    public Product getProduct() {
-        return product;
+    private void openWeb() {
+        System.out.println("Test");
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(getProduct().getProductURL()));
+            } catch (URISyntaxException | IOException ex) {
+                Logger.getLogger(Main.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
+     * Set the view-page click listener.
      *
-     * @param product
+     * @param listener
      */
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Image getItemImage() {
-        return itemImage;
-    }
-
-    /**
-     *
-     * @param itemIcon
-     */
-    public void setItemImage(Image itemIcon) {
-        this.itemImage = itemIcon;
-    }
-
-    /**
-     * Create a new instance.
-     *
-     */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public ItemView() {
-        setItemImage(getImage("webbrowser.png"));
-        Dimension dim = getSize();
-        setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(dim.width, 160));//Learn what this does.
+    public void setClickListener(ClickListener listener) {
+        this.listener = listener;
     }
 
     /**
@@ -104,9 +118,8 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (product.getSound() == -1) {
-            change = Color.BLACK;
-        }
+        float f = (float) product.getChange();
+        Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         int x = 20, y = 10;
         g.drawImage(itemImage, x, y, this);
@@ -118,8 +131,6 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
         y += 20;
         if (product.getSound() == 1) {
-            float f = (float) product.getChange();
-            change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
             if (f > 0.0) {
                 priceDropSound("play.wav");
             }
@@ -210,5 +221,37 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Product getProduct() {
+        return product;
+    }
+
+    /**
+     *
+     * @param product
+     */
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Image getItemImage() {
+        return itemImage;
+    }
+
+    /**
+     *
+     * @param itemIcon
+     */
+    public void setItemImage(Image itemIcon) {
+        this.itemImage = itemIcon;
     }
 }

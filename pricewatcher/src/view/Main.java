@@ -81,14 +81,14 @@ public class Main extends JFrame {
     private PriceFinder webPrice;
 
     /**
-     * Create a new dialog.
+     * Create a Dialog of Default Size (600,400).
      */
     public Main() {
         this(DEFAULT_SIZE);
     }
 
     /**
-     * Create a new dialog of the given screen dimension.
+     * Create a new dialog of the given Dimensions (600,400).
      *
      * @param dim
      */
@@ -98,7 +98,7 @@ public class Main extends JFrame {
         createDefaultProduct();
         setLayout(new BorderLayout());
         setSize(dim);
-        createUI();
+        createGUI();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,10 +109,10 @@ public class Main extends JFrame {
     }
 
     /**
-     * Configure UI.
+     * Create and Configure the GUI.
      *
      */
-    private void createUI() {
+    private void createGUI() {
         controlPanel = createControlPanel();
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
         add(controlPanel, BorderLayout.CENTER);
@@ -133,7 +133,8 @@ public class Main extends JFrame {
     }
 
     /**
-     * Create a control panel consisting of a refresh button.
+     * Create a control panel consisting of a Tool Bar, Menu Bar, and a Pop-up
+     * Menu.
      */
     private JPanel createControlPanel() {
         panel = new JPanel();
@@ -147,8 +148,6 @@ public class Main extends JFrame {
 
     /**
      * Show briefly the given string in the message bar.
-     *
-     * @param msg
      */
     private void showMessage(String msg, int time) {
         msgBar.setText(msg);
@@ -164,6 +163,12 @@ public class Main extends JFrame {
         }).start();
     }
 
+    /**
+     * Listen to when the mouse is either right clicking or left clicking on the
+     * JList.
+     *
+     * @param mouseEvent
+     */
     private void mouseListener(MouseEvent mouseEvent) {
         MouseListener mouseListener = new MouseAdapter() {
             @Override
@@ -171,14 +176,17 @@ public class Main extends JFrame {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
                     popupMenu.show(jListRenderer, mouseEvent.getX(), mouseEvent.getY());
                 }
-                if (SwingUtilities.isLeftMouseButton(mouseEvent) && itemView.imageClicked(mouseEvent.getX(), mouseEvent.getY())) {
-                    openWeb(mouseEvent);
-                }
             }
         };
         jListRenderer.addMouseListener(mouseListener);
     }
 
+    /**
+     * Listen to when the mouse is moving or clicking on certain areas of the
+     * JList.
+     *
+     * @param mouseEvent
+     */
     private void mouseMotionListener(MouseEvent mouseEvent) {
         MouseMotionListener mouseMotion = new MouseMotionListener() {
             @Override
@@ -201,11 +209,12 @@ public class Main extends JFrame {
     }
 
     /**
+     * Create a {@link model.Product} given the parameters.
      *
-     * @param itemURL
-     * @param itemName
-     * @param itemPrice
-     * @param itemDateAdded
+     * @param itemURL the URL that links to the item
+     * @param itemName the name of the product
+     * @param itemPrice the initial price of the item
+     * @param itemDateAdded the date of when the product was added
      * @return
      */
     private Product createProduct(String itemURL, String itemName, double itemPrice, String itemDateAdded) {
@@ -317,7 +326,7 @@ public class Main extends JFrame {
             backUpProductManager = originalProductManager;
             for (int i = 0; i < defaultListModel.getSize(); i++) {
                 if (defaultListModel.get(i).getProductName().toLowerCase().contains(search.getText().toLowerCase())) {
-                    
+
                 }
             }
             repaint();
@@ -415,25 +424,6 @@ public class Main extends JFrame {
             showMessage("Opening Webpage", time);
         } else {
             showMessage("Not Selecting an Item", time);
-        }
-    }
-
-    /**
-     *
-     * @param event
-     */
-    private void openWeb(MouseEvent event) {
-        if (jListRenderer.getSelectedIndex() > -1) {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
-
-                } catch (URISyntaxException | IOException ex) {
-                    Logger.getLogger(Main.class
-                            .getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            showMessage("Opening Webpage", time);
         }
     }
 
