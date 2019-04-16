@@ -19,12 +19,13 @@ public class PriceFinder {
     /**
      * Generate a simulated price of an item between $300.00-$400.00.
      *
+     * @param medValue
      * @return random double between 300 - 400
      */
     @Deprecated
-    public double getSimulatedPrice() {
-        double minValue = 300.00;
-        double maxValue = 400.00;
+    public double getSimulatedPrice(Double medValue) {
+        double minValue = medValue - (medValue / 10);
+        double maxValue = medValue + (medValue / 10);
         return (new BigDecimal(minValue + (maxValue - minValue) * rand.nextDouble()).setScale(2, RoundingMode.CEILING).doubleValue());
     }
 }

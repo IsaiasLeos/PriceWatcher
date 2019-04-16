@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -59,12 +58,12 @@ public class Main extends JFrame {
     private int time = 4;
 
     private JLabel msgBar = new JLabel("");
-    private JPanel control;
-    private JPanel board;
+    private JPanel controlPanel;
+    private JPanel drawingBoard;
     private JPanel panel;
     private JMenuBar menuBar;
     private JToolBar toolBar;
-    private JList jList;
+    private JList jListRenderer;
     private JScrollPane jScrollPane;
     private JPopupMenu popupMenu;
     private MouseEvent mouseEvent;
@@ -106,6 +105,7 @@ public class Main extends JFrame {
         setVisible(true);
         setResizable(true);
         showMessage("Welcome!", time);
+        pack();
     }
 
     /**
@@ -113,20 +113,21 @@ public class Main extends JFrame {
      *
      */
     private void createUI() {
-        control = createControlPanel();
-        control.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
-        add(control, BorderLayout.CENTER);
-        board = new JPanel();
-        jList = createJList();
+        controlPanel = createControlPanel();
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
+        add(controlPanel, BorderLayout.CENTER);
+        drawingBoard = new JPanel();
+        jListRenderer = createJList();
         mouseListener(mouseEvent);
         mouseMotionListener(mouseEvent);
-        jScrollPane = new JScrollPane(jList);
-        board.add(jScrollPane);
-        board.setBorder(BorderFactory.createCompoundBorder(
+        jListRenderer.setVisibleRowCount(3);
+        jScrollPane = new JScrollPane(jListRenderer);
+        drawingBoard.add(jScrollPane);
+        drawingBoard.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.WHITE)));
-        board.setLayout(new GridLayout(1, 1));
-        add(board, BorderLayout.CENTER);
+        drawingBoard.setLayout(new GridLayout(1, 1));
+        add(drawingBoard, BorderLayout.CENTER);
         msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
         add(msgBar, BorderLayout.SOUTH);
     }
@@ -168,14 +169,14 @@ public class Main extends JFrame {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    popupMenu.show(jList, mouseEvent.getX(), mouseEvent.getY());
+                    popupMenu.show(jListRenderer, mouseEvent.getX(), mouseEvent.getY());
                 }
                 if (SwingUtilities.isLeftMouseButton(mouseEvent) && itemView.imageClicked(mouseEvent.getX(), mouseEvent.getY())) {
                     openWeb(mouseEvent);
                 }
             }
         };
-        jList.addMouseListener(mouseListener);
+        jListRenderer.addMouseListener(mouseListener);
     }
 
     private void mouseMotionListener(MouseEvent mouseEvent) {
@@ -196,7 +197,7 @@ public class Main extends JFrame {
                 }
             }
         };
-        jList.addMouseMotionListener(mouseMotion);
+        jListRenderer.addMouseMotionListener(mouseMotion);
     }
 
     /**
@@ -235,7 +236,7 @@ public class Main extends JFrame {
     private void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
-                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice());
+                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(i).getInitialPrice()));
             }
             repaint();
             showMessage("Refreshing...", time);
@@ -250,8 +251,8 @@ public class Main extends JFrame {
      * @param event
      */
     private void singleRefreshButtonClicked(ActionEvent event) {
-        if (jList.getSelectedIndex() > -1) {
-            defaultListModel.get(jList.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice());
+        if (jListRenderer.getSelectedIndex() > -1) {
+            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getInitialPrice()));
             repaint();
             showMessage("Refreshing...", time);
         } else {
@@ -307,7 +308,20 @@ public class Main extends JFrame {
      * @param event
      */
     private void searchButtonClicked(ActionEvent event) {
-        
+        JTextField search = new JTextField();
+        Object[] message = {
+            "Search:", search
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
+        if (option == 0) {
+            backUpProductManager = originalProductManager;
+            for (int i = 0; i < defaultListModel.getSize(); i++) {
+                if (defaultListModel.get(i).getProductName().toLowerCase().contains(search.getText().toLowerCase())) {
+                    
+                }
+            }
+            repaint();
+        }
     }
 
     /**
@@ -316,7 +330,7 @@ public class Main extends JFrame {
      */
     private void moveUpButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {
-            jList.setSelectedIndex(0);
+            jListRenderer.setSelectedIndex(0);
         }
     }
 
@@ -326,7 +340,7 @@ public class Main extends JFrame {
      */
     private void moveDownButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {
-            jList.setSelectedIndex(defaultListModel.getSize() - 1);
+            jListRenderer.setSelectedIndex(defaultListModel.getSize() - 1);
 
         }
     }
@@ -336,8 +350,8 @@ public class Main extends JFrame {
      * @param event
      */
     private void deleteButtonClicked(ActionEvent event) {
-        if (jList.getSelectedIndex() > -1) {
-            defaultListModel.remove(jList.getSelectedIndex());
+        if (jListRenderer.getSelectedIndex() > -1) {
+            defaultListModel.remove(jListRenderer.getSelectedIndex());
             repaint();
         } else {
             showMessage("Not Selecting an Item", time);
@@ -349,8 +363,8 @@ public class Main extends JFrame {
      * @param event
      */
     private void editButtonClicked(ActionEvent event) {
-        if (jList.getSelectedIndex() > -1) {
-            Product generatedProduct = defaultListModel.get(jList.getSelectedIndex());
+        if (jListRenderer.getSelectedIndex() > -1) {
+            Product generatedProduct = defaultListModel.get(jListRenderer.getSelectedIndex());
             JTextField name = new JTextField(generatedProduct.getProductName());
             JTextField url = new JTextField(generatedProduct.getProductURL(), 5);
             JTextField price = new JTextField("" + (generatedProduct.getInitialPrice()));
@@ -362,10 +376,10 @@ public class Main extends JFrame {
             int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
             if (option == 0) {
                 originalProductManager.delete(product);
-                defaultListModel.get(jList.getSelectedIndex()).setProductName(name.getText());
-                defaultListModel.get(jList.getSelectedIndex()).setCurrentURL(url.getText());
-                defaultListModel.get(jList.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
-                defaultListModel.get(jList.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
+                defaultListModel.get(jListRenderer.getSelectedIndex()).setProductName(name.getText());
+                defaultListModel.get(jListRenderer.getSelectedIndex()).setCurrentURL(url.getText());
+                defaultListModel.get(jListRenderer.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
+                defaultListModel.get(jListRenderer.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
                 this.originalProductManager.add(product);
                 repaint();
                 showMessage("Succesfully Edited a Product", time);
@@ -388,10 +402,10 @@ public class Main extends JFrame {
      * @param event
      */
     private void openWeb(ActionEvent event) {
-        if (jList.getSelectedIndex() > -1) {
+        if (jListRenderer.getSelectedIndex() > -1) {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 try {
-                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jList.getSelectedIndex()).getProductURL()));
+                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
 
                 } catch (URISyntaxException | IOException ex) {
                     Logger.getLogger(Main.class
@@ -409,10 +423,10 @@ public class Main extends JFrame {
      * @param event
      */
     private void openWeb(MouseEvent event) {
-        if (jList.getSelectedIndex() > -1) {
+        if (jListRenderer.getSelectedIndex() > -1) {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 try {
-                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jList.getSelectedIndex()).getProductURL()));
+                    Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
 
                 } catch (URISyntaxException | IOException ex) {
                     Logger.getLogger(Main.class
@@ -709,15 +723,15 @@ public class Main extends JFrame {
      * @param copyTo
      */
     private void copyToClipboard(String copyTo) {
-        if (jList.getSelectedIndex() > -1) {
+        if (jListRenderer.getSelectedIndex() > -1) {
             StringSelection selection = new StringSelection("");
             Clipboard clipboard;
             if (copyTo.equalsIgnoreCase("name")) {
-                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductName());
+                selection = new StringSelection(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductName());
             } else if (copyTo.equalsIgnoreCase("url")) {
-                selection = new StringSelection(defaultListModel.get(jList.getSelectedIndex()).getProductURL());
+                selection = new StringSelection(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL());
             } else if (copyTo.equalsIgnoreCase("item")) {
-                Product toClipboard = defaultListModel.get(jList.getSelectedIndex());
+                Product toClipboard = defaultListModel.get(jListRenderer.getSelectedIndex());
                 selection = new StringSelection(
                         "Name:  " + toClipboard.getProductName() + "\n"
                         + "URL:  " + toClipboard.getProductURL() + "\n"
