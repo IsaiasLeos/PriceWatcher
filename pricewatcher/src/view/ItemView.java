@@ -3,7 +3,6 @@ package view;
 import model.Product;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,13 +12,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -88,18 +83,6 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
             setForeground(list.getForeground());
         }
         return this;
-    }
-
-    private void openWeb() {
-        System.out.println("Test");
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            try {
-                Desktop.getDesktop().browse(new URI(getProduct().getProductURL()));
-            } catch (URISyntaxException | IOException ex) {
-                Logger.getLogger(Main.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     /**

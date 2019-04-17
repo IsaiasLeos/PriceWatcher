@@ -13,6 +13,7 @@ public class ProductManager {
     }
 
     /**
+     * Adds a {@link model.Product} to the Product List
      *
      * @param product
      */
@@ -21,6 +22,7 @@ public class ProductManager {
     }
 
     /**
+     * Deletes a {@link model.Product} from the Product List
      *
      * @param product
      */
@@ -30,20 +32,23 @@ public class ProductManager {
 
     /**
      *
-     * @return
+     * @return the list of products
      */
     public List<Product> getList() {
         return this.getProducts();
     }
 
     /**
-     * @return the items
+     *
+     * @return the the list of products
      */
     public List<Product> getProducts() {
         return this.products;
     }
 
     /**
+     * Sets the current product list to the given one from the parameter.
+     *
      * @param products
      */
     public void setItems(List<Product> products) {
