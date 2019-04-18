@@ -60,7 +60,7 @@ public class Main extends JFrame {
     private JLabel msgBar = new JLabel("");
     private JList jListRenderer;
     private JPopupMenu popupMenu;
-
+    private Renderer renderer;
     private DefaultListModel<Product> defaultListModel;
 
     private final static String RESOURCE_DIR = "resources/";
@@ -126,12 +126,10 @@ public class Main extends JFrame {
      * Menu.
      */
     private JPanel createControlPanel() {
-        JPanel panel = new JPanel();
-        JToolBar toolBar = createJToolBar("Toolbar");
         createJPopupMenu();
         createJMenuBar();
-        add(toolBar, BorderLayout.NORTH);
-        return panel;
+        add(createJToolBar("Toolbar"), BorderLayout.NORTH);
+        return new JPanel();
     }
 
     /**
@@ -164,6 +162,7 @@ public class Main extends JFrame {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
                     popupMenu.show(jListRenderer, mouseEvent.getX(), mouseEvent.getY());
                 }
+
                 if (mouseEvent.getClickCount() == 2) {
                     openWeb();
                 }
@@ -189,6 +188,7 @@ public class Main extends JFrame {
             }
         };
         jListRenderer.addMouseMotionListener(mouseMotion);
+
     }
 
     /**
@@ -271,9 +271,15 @@ public class Main extends JFrame {
         int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
         //OK
         if (option == 0) {
-            Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()), getCurrentDate());
-            defaultListModel.addElement(generatedProduct);
-            showMessage("Product Successfully Added", time);
+            try {
+                Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()), getCurrentDate());
+                defaultListModel.addElement(generatedProduct);
+                showMessage("Product Successfully Added", time);
+            } catch (NumberFormatException e) {
+                showMessage("Please re-enter correct information.", time);
+            } catch (IllegalArgumentException e) {
+                showMessage("Please re-enter correct information.", time);
+            }
         }
         //Cancel 
         if (option == 2) {
@@ -376,14 +382,18 @@ public class Main extends JFrame {
             };
             int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE, 0, new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
             if (option == 0) {
-                originalProductManager.delete(product);
-                defaultListModel.get(jListRenderer.getSelectedIndex()).setProductName(name.getText());
-                defaultListModel.get(jListRenderer.getSelectedIndex()).setCurrentURL(url.getText());
-                defaultListModel.get(jListRenderer.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
-                defaultListModel.get(jListRenderer.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
-                this.originalProductManager.add(product);
-                repaint();
-                showMessage("Succesfully Edited a Product", time);
+                try {
+                    originalProductManager.delete(product);
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setProductName(name.getText());
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setCurrentURL(url.getText());
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setInitialPrice(Double.parseDouble(price.getText()));
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setProductPrice(Double.parseDouble(price.getText()));
+                    originalProductManager.add(product);
+                    repaint();
+                    showMessage("Succesfully Edited a Product", time);
+                } catch (NumberFormatException e) {
+                    showMessage("Please re-enter correct information.", time);
+                }
             }
             //Close Button
             if (option == -1) {
@@ -582,7 +592,7 @@ public class Main extends JFrame {
      *
      * @return a pop-up menu of items
      */
-    private JPopupMenu createJPopupMenu() {
+    private void createJPopupMenu() {
         JPopupMenu generatedPopupMenu = new JPopupMenu();
         JMenuItem price = createJMenutItem("Price");
         price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
@@ -610,7 +620,7 @@ public class Main extends JFrame {
         generatedPopupMenu.add(cname);
         generatedPopupMenu.add(curl);
         generatedPopupMenu.add(citem);
-        return generatedPopupMenu;
+        popupMenu = generatedPopupMenu;
     }
 
     /**
@@ -632,7 +642,8 @@ public class Main extends JFrame {
      */
     private JList createJList(DefaultListModel defaultListModel) {
         JList generatedJList = new JList<>(defaultListModel);
-        generatedJList.setCellRenderer(new ItemView());
+        renderer = new Renderer();
+        generatedJList.setCellRenderer(renderer);
         return generatedJList;
     }
 
@@ -700,51 +711,39 @@ public class Main extends JFrame {
         sortMenu.add(high);
         JMenuItem priceChange = new JRadioButtonMenuItem("Price Change (%)");
         priceChange.addActionListener((event) -> this.sortChange(event));
-        createNestedJMenu();
-        editMenu.add(createNestedJMenu());
-        sortMenu.add(priceChange);
-        fileMenuBar.add(appMenu);
-        fileMenuBar.add(editMenu);
-        fileMenuBar.add(sortMenu);
-        setJMenuBar(fileMenuBar);
-    }
-
-    /**
-     * Creates a JMenu that will be nested inside of {@link #createJMenuBar()}.
-     * The following actions will only work on a selected cell inside of the
-     * {@link JList}. Similar actions to that of {@link JPopupMenu}.
-     *
-     * @return the JMenu
-     */
-    private JMenu createNestedJMenu() {
         JMenu generatedNestedMenu = new JMenu("Selected");
-        JMenuItem price = createJMenutItem("Price");
-        price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
-        price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        JMenuItem view = createJMenutItem("View");
-        view.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "webbrowser.png")));
-        view.addActionListener((event) -> this.openWeb(event));
-        JMenuItem edit = createJMenutItem("Edit");
-        edit.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
-        edit.addActionListener((event) -> this.editButtonClicked(event));
-        JMenuItem remove = createJMenutItem("Remove");
-        remove.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
-        remove.addActionListener((event) -> this.deleteButtonClicked(event));
+        JMenuItem priceNested = createJMenutItem("Price");
+        priceNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
+        priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
+        JMenuItem viewNested = createJMenutItem("View");
+        viewNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "webbrowser.png")));
+        viewNested.addActionListener((event) -> this.openWeb(event));
+        JMenuItem editNested = createJMenutItem("Edit");
+        editNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
+        editNested.addActionListener((event) -> this.editButtonClicked(event));
+        JMenuItem removeNested = createJMenutItem("Remove");
+        removeNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
+        removeNested.addActionListener((event) -> this.deleteButtonClicked(event));
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.copyToClipboard(1));
         JMenuItem curl = new JMenuItem("Copy URL");
         curl.addActionListener((event) -> this.copyToClipboard(2));
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.copyToClipboard(3));
-        generatedNestedMenu.add(price);
-        generatedNestedMenu.add(view);
-        generatedNestedMenu.add(edit);
-        generatedNestedMenu.add(remove);
+        generatedNestedMenu.add(priceNested);
+        generatedNestedMenu.add(viewNested);
+        generatedNestedMenu.add(editNested);
+        generatedNestedMenu.add(removeNested);
         generatedNestedMenu.addSeparator();
         generatedNestedMenu.add(cname);
         generatedNestedMenu.add(curl);
         generatedNestedMenu.add(citem);
-        return generatedNestedMenu;
+        editMenu.add(generatedNestedMenu);
+        sortMenu.add(priceChange);
+        fileMenuBar.add(appMenu);
+        fileMenuBar.add(editMenu);
+        fileMenuBar.add(sortMenu);
+        setJMenuBar(fileMenuBar);
     }
 
     /**

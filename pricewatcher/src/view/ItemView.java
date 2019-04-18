@@ -2,14 +2,10 @@ package view;
 
 import model.Product;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.net.URL;
@@ -21,9 +17,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
 
 /**
  * A special panel to display the detail of an item.
@@ -31,15 +25,10 @@ import javax.swing.ListCellRenderer;
  * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
-public class ItemView extends JPanel implements ListCellRenderer<Product> {
+public class ItemView extends JPanel {
 
     private Image itemImage;
     private Product product;
-
-    /**
-     * View-page clicking listener.
-     */
-    private ClickListener listener;
 
     /**
      * Directory for image files: src/image.
@@ -56,42 +45,6 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         Dimension dim = getSize();
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(dim.width, 160));//Learn what this does.
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-        });
-    }
-
-    public interface ClickListener {
-
-        /**
-         * Callback to be invoked when the view page icon is clicked.
-         */
-        void clicked();
-    }
-
-    @Override
-    public Component getListCellRendererComponent(JList<? extends Product> list, Product value, int index, boolean isSelected, boolean cellHasFocus) {
-        setProduct(value);
-        if (isSelected) {
-            setBackground(list.getSelectionBackground());
-            setForeground(list.getSelectionForeground());
-        } else {
-            setBackground(list.getBackground());
-            setForeground(list.getForeground());
-        }
-        return this;
-    }
-
-    /**
-     * Set the view-page click listener.
-     *
-     * @param listener
-     */
-    public void setClickListener(ClickListener listener) {
-        this.listener = listener;
     }
 
     /**
@@ -115,7 +68,7 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         y += 20;
         if (product.getSound() == 1) {
             if (f > 0.0) {
-                priceDropSound("play.wav");
+                priceDecreased("play.wav");
             }
             product.setSound(0);
         }
@@ -138,36 +91,21 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
      * @return the re-formated string
      */
     private AttributedCharacterIterator textAttrManipulation(String productPrefix, String productPostfix, int font, Color color) {
-        AttributedString text = new AttributedString(productPrefix + productPostfix);
-        text.addAttribute(TextAttribute.FONT, new Font("Arial", Font.PLAIN, 12),
-                0, productPrefix.length() + productPostfix.length());
-        text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 12),
-                productPrefix.length(),
-                productPrefix.length() + productPostfix.length());
-        text.addAttribute(TextAttribute.FOREGROUND, color,
-                productPrefix.length(),
-                productPrefix.length() + productPostfix.length());
-        return text.getIterator();
-    }
-
-    /**
-     *
-     * @param x x-coordinate of the mouse pointer
-     * @param y y-coordinate of the mouse pointer
-     * @return true if the given screen coordinate is inside the viewPage icon.
-     */
-    private boolean isImageClicked(int x, int y) {
-        return new Rectangle(20, 10, 24, 24).contains(x, y);
-    }
-
-    /**
-     *
-     * @param x x-coordinate of the mouse pointer
-     * @param y y-coordinate of the mouse pointer
-     * @return true if the given screen coordinate is inside the viewPage icon.
-     */
-    public boolean imageClicked(int x, int y) {
-        return isImageClicked(x, y);
+        try {
+            AttributedString text = new AttributedString(productPrefix + productPostfix);
+            text.addAttribute(TextAttribute.FONT, new Font("Arial", Font.PLAIN, 12),
+                    0, productPrefix.length() + productPostfix.length());
+            text.addAttribute(TextAttribute.FONT, new Font("Arial", font, 12),
+                    productPrefix.length(),
+                    productPrefix.length() + productPostfix.length());
+            text.addAttribute(TextAttribute.FOREGROUND, color,
+                    productPrefix.length(),
+                    productPrefix.length() + productPostfix.length());
+            return text.getIterator();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -194,7 +132,7 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
      * @param file
      */
     @SuppressWarnings("CallToPrintStackTrace")
-    private void priceDropSound(String filename) {
+    private void priceDecreased(String filename) {
         try {
             URL url = new URL(getClass().getResource(RESOURCE_DIR), filename);
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
@@ -230,7 +168,7 @@ public class ItemView extends JPanel implements ListCellRenderer<Product> {
         return itemImage;
     }
 
-    /**
+    /** 
      *
      * @param itemIcon
      */
