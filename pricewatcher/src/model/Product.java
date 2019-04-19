@@ -1,7 +1,11 @@
 package model;
 
+import java.awt.Image;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
+import javax.imageio.ImageIO;
 
 /**
  * This class holds information about the current product and changes done to
@@ -17,6 +21,7 @@ public class Product {
     private double productPrice;
     private double change;
     private double initialPrice;
+    private Image productIcon;
     private int sound = -1;
 
     /**
@@ -27,12 +32,15 @@ public class Product {
      * @param initialPrice price when first added
      * @param addedDate date product was added
      */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public Product(String currentURL, String productName, double initialPrice, String addedDate) {
         this.productURL = currentURL;
         this.productName = productName;
         this.initialPrice = initialPrice;
         this.productPrice = initialPrice;
         this.addedDate = addedDate;
+        this.productIcon = getProductIcon("webbrowser.png");
+
     }
 
     /**
@@ -184,6 +192,34 @@ public class Product {
      */
     public void setInitialPrice(double initialPrice) {
         this.initialPrice = initialPrice;
+    }
+
+    public Image getProductIcon() {
+        if (productIcon == null) {
+            this.productIcon = getProductIcon("webbrowser.png");
+        }
+        return productIcon;
+    }
+
+    public void setProductIcon(String productIcon) {
+        this.productIcon = getProductIcon(productIcon);
+    }
+
+    /**
+     * Return the image stored in the given file.
+     *
+     * @param file
+     * @return
+     */
+    @SuppressWarnings("CallToPrintStackTrace")
+    public Image getProductIcon(String file) {
+        try {
+            URL url = new URL(getClass().getResource("/resources/"), file);
+            return ImageIO.read(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

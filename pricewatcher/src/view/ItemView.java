@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
-import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -27,13 +26,10 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class ItemView extends JPanel {
 
-    private Image itemImage;
     private Product product;
+    private Image itemImage;
 
-    /**
-     * Directory for image files: src/image.
-     */
-    private final static String RESOURCE_DIR = "/resources/";
+    public final Dimension dim = new Dimension(0, 160);
 
     /**
      * Create a new instance.
@@ -41,10 +37,8 @@ public class ItemView extends JPanel {
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public ItemView() {
-        setItemImage(getImage("webbrowser.png"));
-        Dimension dim = getSize();
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(dim.width, 160));//Learn what this does.
+        setPreferredSize(dim);
     }
 
     /**
@@ -58,7 +52,7 @@ public class ItemView extends JPanel {
         Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         int x = 20, y = 10;
-        g.drawImage(itemImage, x, y, this);
+        g.drawImage(product.getProductIcon(), x, y, this);
         y += 24 + 20;
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
@@ -75,7 +69,6 @@ public class ItemView extends JPanel {
         g.drawString(textAttrManipulation("Change:  ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
         y += 20;
         g.drawString("Added:     " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
-        y += 80;
         g.dispose();
     }
 
@@ -109,23 +102,6 @@ public class ItemView extends JPanel {
     }
 
     /**
-     * Return the image stored in the given file.
-     *
-     * @param file
-     * @return
-     */
-    @SuppressWarnings("CallToPrintStackTrace")
-    public Image getImage(String file) {
-        try {
-            URL url = new URL(getClass().getResource(RESOURCE_DIR), file);
-            return ImageIO.read(url);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * Play the audio clip (wav) specified by a URL. This method has no effect
      * if the audio clip cannot be found.
      *
@@ -134,7 +110,7 @@ public class ItemView extends JPanel {
     @SuppressWarnings("CallToPrintStackTrace")
     private void priceDecreased(String filename) {
         try {
-            URL url = new URL(getClass().getResource(RESOURCE_DIR), filename);
+            URL url = new URL(getClass().getResource("/resources/"), filename);
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
@@ -168,7 +144,7 @@ public class ItemView extends JPanel {
         return itemImage;
     }
 
-    /** 
+    /**
      *
      * @param itemIcon
      */

@@ -23,8 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -60,13 +58,13 @@ public class Main extends JFrame {
     private JLabel msgBar = new JLabel("");
     private JList jListRenderer;
     private JPopupMenu popupMenu;
-    private Renderer renderer;
     private DefaultListModel<Product> defaultListModel;
 
     private final static String RESOURCE_DIR = "resources/";
     private final static Dimension DEFAULT_SIZE = new Dimension(600, 400);
 
     private Product product;
+    private Renderer renderer;
     private ProductManager originalProductManager;
     private PriceFinder webPrice;
 
@@ -141,7 +139,6 @@ public class Main extends JFrame {
             try {
                 Thread.sleep(time * 1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
             }
             if (msg.equals(msgBar.getText())) {
                 SwingUtilities.invokeLater(() -> msgBar.setText(" "));
@@ -162,7 +159,13 @@ public class Main extends JFrame {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
                     popupMenu.show(jListRenderer, mouseEvent.getX(), mouseEvent.getY());
                 }
-
+                if (mouseEvent.getClickCount() == 1) {
+                    for (int i = 0; i < defaultListModel.getSize(); i++) {
+                        if ((mouseEvent.getX() < 40 && mouseEvent.getX() > 22) && (mouseEvent.getY() < 32 + (i * 160) && mouseEvent.getY() > 12 + (i * 160))) {
+                            openWeb();
+                        }
+                    }
+                }
                 if (mouseEvent.getClickCount() == 2) {
                     openWeb();
                 }
@@ -182,9 +185,15 @@ public class Main extends JFrame {
             @Override
             public void mouseDragged(MouseEvent e) {
             }
-
             @Override
             public void mouseMoved(MouseEvent e) {
+                if ((e.getX() < 40 && e.getX() > 22) && (e.getY() < 32 + (jListRenderer.getSelectedIndex() * 160) && e.getY() > 12 + (jListRenderer.getSelectedIndex() * 160)) && jListRenderer.getSelectedIndex() != -1) {
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("webbrowserbig.png");
+                    repaint();
+                } else if (jListRenderer.getSelectedIndex() > -1) {
+                    defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("webbrowser.png");
+                    repaint();
+                }
             }
         };
         jListRenderer.addMouseMotionListener(mouseMotion);
@@ -207,6 +216,7 @@ public class Main extends JFrame {
     /**
      *
      */
+    @SuppressWarnings("unchecked")
     private void createDefaultProduct() {
         originalProductManager = new ProductManager();
         String productURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
@@ -223,6 +233,7 @@ public class Main extends JFrame {
      *
      * @param event
      */
+    @SuppressWarnings("deprecation")
     private void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
@@ -241,6 +252,7 @@ public class Main extends JFrame {
      *
      * @param event
      */
+    @SuppressWarnings("deprecation")
     private void singleRefreshButtonClicked(ActionEvent event) {
         if (jListRenderer.getSelectedIndex() > -1) {
             defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getInitialPrice()));
@@ -421,8 +433,6 @@ public class Main extends JFrame {
                     Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
 
                 } catch (URISyntaxException | IOException ex) {
-                    Logger.getLogger(Main.class
-                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
             showMessage("Opening Webpage", time);
@@ -440,8 +450,6 @@ public class Main extends JFrame {
             try {
                 Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
             } catch (URISyntaxException | IOException ex) {
-                Logger.getLogger(Main.class
-                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -546,36 +554,36 @@ public class Main extends JFrame {
      */
     private JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
-        JButton checkmark = createButton("checkmark.png", "Check Item Prices", false);
+        JButton checkmark = createJButton("checkmark.png", "Check Item Prices", false);
         checkmark.addActionListener((event) -> this.refreshButtonClicked(event));
         toolBar.add(checkmark);
-        JButton add = createButton("plus.png", "Add Product", false);
+        JButton add = createJButton("plus.png", "Add Product", false);
         add.addActionListener((event) -> this.addButtonClicked(event));
         toolBar.add(add);
-        JButton search = createButton("search.png", "Search for a Item", false);
+        JButton search = createJButton("search.png", "Search for a Item", false);
         search.addActionListener((event) -> this.searchButtonClicked(event));
         toolBar.add(search);
-        JButton upButton = createButton("up.png", "Move to First Item", false);
+        JButton upButton = createJButton("up.png", "Move to First Item", false);
         upButton.addActionListener((event) -> this.moveUpButtonClicked(event));
         toolBar.add(upButton);
-        JButton downButton = createButton("down.png", "Move to Last Item", false);
+        JButton downButton = createJButton("down.png", "Move to Last Item", false);
         downButton.addActionListener((event) -> this.moveDownButtonClicked(event));
         toolBar.add(downButton);
         toolBar.addSeparator();
-        JButton singleRefresh = createButton("refresh.png", "Refresh Selected Item", false);
+        JButton singleRefresh = createJButton("refresh.png", "Refresh Selected Item", false);
         singleRefresh.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         toolBar.add(singleRefresh);
-        JButton openLink = createButton("webbrowser.png", "Open in Browser", false);
+        JButton openLink = createJButton("webbrowser.png", "Open in Browser", false);
         openLink.addActionListener((event) -> this.openWeb(event));
         toolBar.add(openLink);
-        JButton delete = createButton("delete.png", "Delete Selected Item", false);
+        JButton delete = createJButton("delete.png", "Delete Selected Item", false);
         delete.addActionListener((event) -> this.deleteButtonClicked(event));
         toolBar.add(delete);
-        JButton edit = createButton("edit.png", "Edit Selected Item", false);
+        JButton edit = createJButton("edit.png", "Edit Selected Item", false);
         edit.addActionListener((event) -> this.editButtonClicked(event));
         toolBar.add(edit);
         toolBar.addSeparator();
-        JButton about = createButton("about.png", "App Information", false);
+        JButton about = createJButton("about.png", "App Information", false);
         about.addActionListener((event) -> this.aboutButtonClicked(event));
         toolBar.add(about);
         return toolBar;
@@ -594,17 +602,13 @@ public class Main extends JFrame {
      */
     private void createJPopupMenu() {
         JPopupMenu generatedPopupMenu = new JPopupMenu();
-        JMenuItem price = createJMenutItem("Price");
-        price.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
+        JMenuItem price = createJMenutItem("Price", "checkmark.png", "Check Prices");
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        JMenuItem view = createJMenutItem("View");
-        view.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "webbrowser.png")));
+        JMenuItem view = createJMenutItem("View", "webbrowser.png", "View Item in Browser");
         view.addActionListener((event) -> this.openWeb(event));
-        JMenuItem edit = createJMenutItem("Edit");
-        edit.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
+        JMenuItem edit = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         edit.addActionListener((event) -> this.editButtonClicked(event));
-        JMenuItem remove = createJMenutItem("Remove");
-        remove.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
+        JMenuItem remove = createJMenutItem("Remove", "delete.png", "Delete Selected Item");
         remove.addActionListener((event) -> this.deleteButtonClicked(event));
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.copyToClipboard(1));
@@ -656,36 +660,28 @@ public class Main extends JFrame {
         JMenu appMenu = new JMenu("App");
         JMenu editMenu = new JMenu("Item");
         JMenu sortMenu = new JMenu("Sort");
-        JMenuItem about = createJMenuItem("About", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
+        JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
         about.addActionListener((event) -> this.aboutButtonClicked(event));
-        about.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "about.png")));
         appMenu.add(about);
-        JMenuItem exit = createJMenuItem("Exit", KeyEvent.VK_X, ActionEvent.ALT_MASK);
+        JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
         exit.addActionListener((event) -> this.exitButtonClicked(event));
         exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
         appMenu.add(exit);
-        JMenuItem check = createJMenuItem("Check Prices", KeyEvent.VK_C, ActionEvent.ALT_MASK);
+        JMenuItem check = createJMenuItem("Check Prices", "Check Item Prices", "checkmark.png", KeyEvent.VK_C, ActionEvent.ALT_MASK);
         check.addActionListener((event) -> this.refreshButtonClicked(event));
-        check.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
         editMenu.add(check);
-        JMenuItem add = createJMenuItem("Add", KeyEvent.VK_A, ActionEvent.ALT_MASK);
+        JMenuItem add = createJMenuItem("Add", "Add a Product", "plus.png", KeyEvent.VK_A, ActionEvent.ALT_MASK);
         add.addActionListener((event) -> this.addButtonClicked(event));
-        add.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "plus.png")));
         editMenu.add(add);
-        JMenuItem edit = createJMenuItem("Edit", KeyEvent.VK_E, ActionEvent.ALT_MASK);
-        edit.addActionListener((event) -> this.editButtonClicked(event));
-        edit.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
-        editMenu.add(edit);
         editMenu.add(new JSeparator());
-        JMenuItem search = createJMenuItem("Search", KeyEvent.VK_S, ActionEvent.ALT_MASK);
+        JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
         search.addActionListener((event) -> this.searchButtonClicked(event));
         search.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "search.png")));
         editMenu.add(search);
-        JMenuItem forward = createJMenuItem("Move Up", KeyEvent.VK_UP, ActionEvent.ALT_MASK);
+        JMenuItem forward = createJMenuItem("Select First", "Move to First Item", "up.png", KeyEvent.VK_UP, ActionEvent.ALT_MASK);
         forward.addActionListener((event) -> this.moveUpButtonClicked(event));
-        forward.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "up.png")));
         editMenu.add(forward);
-        JMenuItem backward = createJMenuItem("Move Down", KeyEvent.VK_DOWN, ActionEvent.ALT_MASK);
+        JMenuItem backward = createJMenuItem("Select Last", "Move to Last Item", "down.png", KeyEvent.VK_DOWN, ActionEvent.ALT_MASK);
         backward.addActionListener((event) -> this.moveDownButtonClicked(event));
         backward.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "down.png")));
         editMenu.add(backward);
@@ -712,17 +708,13 @@ public class Main extends JFrame {
         JMenuItem priceChange = new JRadioButtonMenuItem("Price Change (%)");
         priceChange.addActionListener((event) -> this.sortChange(event));
         JMenu generatedNestedMenu = new JMenu("Selected");
-        JMenuItem priceNested = createJMenutItem("Price");
-        priceNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "checkmark.png")));
+        JMenuItem priceNested = createJMenutItem("Price", "checkmark.png", "Check Prices");
         priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        JMenuItem viewNested = createJMenutItem("View");
-        viewNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "webbrowser.png")));
+        JMenuItem viewNested = createJMenutItem("View", "webbrowser.png", "View Item on Browser");
         viewNested.addActionListener((event) -> this.openWeb(event));
-        JMenuItem editNested = createJMenutItem("Edit");
-        editNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "edit.png")));
+        JMenuItem editNested = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         editNested.addActionListener((event) -> this.editButtonClicked(event));
-        JMenuItem removeNested = createJMenutItem("Remove");
-        removeNested.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + "delete.png")));
+        JMenuItem removeNested = createJMenutItem("Remove", "delete.png", "Delete selected Item");
         removeNested.addActionListener((event) -> this.deleteButtonClicked(event));
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.copyToClipboard(1));
@@ -792,11 +784,13 @@ public class Main extends JFrame {
      * @param mask modifier
      * @return
      */
-    private JMenuItem createJMenuItem(String label, int key, int mask) {
+    private JMenuItem createJMenuItem(String label, String tooltip, String itemName, int key, int mask) {
         JMenuItem menuItem = new JMenuItem(label);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(key, mask));
         menuItem.setMnemonic(mask);
         menuItem.setRolloverEnabled(true);
+        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + itemName)));
+        menuItem.setToolTipText(tooltip);
         return menuItem;
     }
 
@@ -807,9 +801,11 @@ public class Main extends JFrame {
      * @param label
      * @return the JMenuItem
      */
-    private JMenuItem createJMenutItem(String label) {
+    private JMenuItem createJMenutItem(String label, String imageName, String tooltip) {
         JMenuItem menuItem = new JMenuItem(label);
         menuItem.setRolloverEnabled(true);
+        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + imageName)));
+        menuItem.setToolTipText(tooltip);
         return menuItem;
 
     }
@@ -821,7 +817,7 @@ public class Main extends JFrame {
      * @param enabled
      * @return a button
      */
-    private JButton createButton(String label, String tooltip, boolean enabled) {
+    private JButton createJButton(String label, String tooltip, boolean enabled) {
         JButton button = new JButton();
         button.setIcon(new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_DIR + label)));
         button.setFocusPainted(enabled);

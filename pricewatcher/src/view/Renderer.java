@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Component;
+
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import model.Product;
@@ -23,5 +24,4 @@ public class Renderer extends ItemView implements ListCellRenderer<Product> {
         }
         return this;
     }
-
 }
