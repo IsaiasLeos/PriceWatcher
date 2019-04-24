@@ -9,7 +9,7 @@ import java.util.Random;
  *
  * @author Isaias Leos
  */
-public class PriceFinder {
+public class PriceFinder extends WebServerSocket {
 
     /**
      *
@@ -20,10 +20,11 @@ public class PriceFinder {
      * Generate a simulated price of an item between $300.00-$400.00.
      *
      * @param medValue
+     * @param url
      * @return random double between 300 - 400
      */
-    @Deprecated
-    public double getSimulatedPrice(Double medValue) {
+    public double getSimulatedPrice(Double medValue, String url) {
+        super.checkURL(url);//Temporary Check | TODO Remove
         double minValue = medValue - (medValue / 10);
         double maxValue = medValue + (medValue / 10);
         return (new BigDecimal(minValue + (maxValue - minValue) * rand.nextDouble()).setScale(2, RoundingMode.CEILING).doubleValue());

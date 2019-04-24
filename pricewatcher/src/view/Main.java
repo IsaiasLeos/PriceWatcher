@@ -185,10 +185,19 @@ public class Main extends JFrame {
             @Override
             public void mouseDragged(MouseEvent e) {
             }
+
             @Override
             public void mouseMoved(MouseEvent e) {
                 if ((e.getX() < 40 && e.getX() > 22) && (e.getY() < 32 + (jListRenderer.getSelectedIndex() * 160) && e.getY() > 12 + (jListRenderer.getSelectedIndex() * 160)) && jListRenderer.getSelectedIndex() != -1) {
-                    defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("webbrowserbig.png");
+                    if (defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL().contains("ebay")) {
+                        defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("ebay.png");
+                    }
+                    if (defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL().contains("amazon")) {
+                        defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("amazon.png");
+                    }
+                    if (defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL().contains("walmart")) {
+                        defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("walmart.png");
+                    }
                     repaint();
                 } else if (jListRenderer.getSelectedIndex() > -1) {
                     defaultListModel.get(jListRenderer.getSelectedIndex()).setProductIcon("webbrowser.png");
@@ -237,7 +246,7 @@ public class Main extends JFrame {
     private void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
-                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(i).getInitialPrice()));
+                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(i).getInitialPrice(), defaultListModel.get(i).getProductURL()));
             }
             repaint();
             showMessage("Refreshing...", time);
@@ -255,7 +264,7 @@ public class Main extends JFrame {
     @SuppressWarnings("deprecation")
     private void singleRefreshButtonClicked(ActionEvent event) {
         if (jListRenderer.getSelectedIndex() > -1) {
-            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getInitialPrice()));
+            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getInitialPrice(), defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
             repaint();
             showMessage("Refreshing...", time);
         } else {
