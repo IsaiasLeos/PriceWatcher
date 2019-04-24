@@ -246,7 +246,7 @@ public class Main extends JFrame {
     private void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
-                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(i).getInitialPrice(), defaultListModel.get(i).getProductURL()));
+                defaultListModel.get(i).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(i).getProductURL()));
             }
             repaint();
             showMessage("Refreshing...", time);
@@ -264,7 +264,7 @@ public class Main extends JFrame {
     @SuppressWarnings("deprecation")
     private void singleRefreshButtonClicked(ActionEvent event) {
         if (jListRenderer.getSelectedIndex() > -1) {
-            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getInitialPrice(), defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
+            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getSimulatedPrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
             repaint();
             showMessage("Refreshing...", time);
         } else {

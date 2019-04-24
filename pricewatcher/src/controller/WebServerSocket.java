@@ -35,7 +35,7 @@ public class WebServerSocket {
      * @return
      */
     private double getEbayPrice() {
-        return 0.00;
+        return -1.00;
     }
 
     /**
@@ -43,7 +43,8 @@ public class WebServerSocket {
      * @return
      */
     private double getAmazonPrice() {
-        return 0.00;
+        //Code
+        return -1.00;
     }
 
     /**
@@ -51,7 +52,7 @@ public class WebServerSocket {
      * @return
      */
     private double getWalmartPrice() {
-        return 0.00;
+        return -1.00;
     }
 
     /**
@@ -59,7 +60,7 @@ public class WebServerSocket {
      * @return
      */
     private double getWishPrice() {
-        return 0.00;
+        return -1.00;
     }
 
 }
