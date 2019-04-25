@@ -1,6 +1,6 @@
 package view;
 
-import com.bulenkov.darcula.DarculaLaf;
+//import com.bulenkov.darcula.DarculaLaf;
 import controller.PriceFinder;
 import controller.ProductManager;
 import model.Product;
@@ -8,7 +8,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -20,13 +19,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.BorderFactory;
@@ -51,7 +46,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.basic.BasicLookAndFeel;
 
 /**
  * A dialog for tracking the price of an item.
@@ -75,6 +69,7 @@ public class Main extends JFrame {
     private Renderer renderer;
     private ProductManager originalProductManager;
     private PriceFinder webPrice;
+    public String theme;
 
     /**
      * Create a Dialog of Default Size (600,400).
@@ -670,17 +665,19 @@ public class Main extends JFrame {
     private JList createJList(DefaultListModel defaultListModel) {
         JList generatedJList = new JList<>(defaultListModel);
         renderer = new Renderer();
+        renderer.setTheme(theme);
         generatedJList.setCellRenderer(renderer);
         return generatedJList;
     }
 
     private void switchThemes(String theme) {
         try {
-            if (theme.contains("Dracula")) {
-                javax.swing.UIManager.setLookAndFeel(new DarculaLaf());
-            }
+//            if (theme.contains("Dracula")) {
+//                javax.swing.UIManager.setLookAndFeel(new DarculaLaf());
+//            }
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if (theme.equals(info.getName())) {
+                    this.theme = theme;
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }

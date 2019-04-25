@@ -28,6 +28,15 @@ public class ItemView extends JPanel {
 
     private Product product;
     private Image itemImage;
+    private String theme = "Metal";
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
 
     public final Dimension dim = new Dimension(0, 160);
 
@@ -56,7 +65,7 @@ public class ItemView extends JPanel {
         y += 24 + 20;
         g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
-        g.drawString("URL:         " + product.getProductURL(), x, y);
+        g.drawString(textAttrManipulation("URL:         " + product.getProductURL(), " ", Font.PLAIN, Color.BLACK), x, y);
         y += 20;
         g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
         y += 20;
@@ -68,7 +77,7 @@ public class ItemView extends JPanel {
         }
         g.drawString(textAttrManipulation("Change:  ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
         y += 20;
-        g.drawString("Added:     " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", x, y);
+        g.drawString(textAttrManipulation("Added:     " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", " ", Font.PLAIN, Color.BLACK), x, y);
         g.dispose();
     }
 
