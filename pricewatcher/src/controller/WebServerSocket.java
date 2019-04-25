@@ -19,13 +19,13 @@ public class WebServerSocket {
      */
     public double checkURL(String url) {
         if (url.contains("ebay")) {
-            return getEbayPrice();
+            return getEbayPrice(url);
         } else if (url.contains("amazon")) {
-            return getAmazonPrice();
+            return getAmazonPrice(url);
         } else if (url.contains("walmart")) {
-            return getWalmartPrice();
+            return getWalmartPrice(url);
         } else if (url.contains("wish")) {
-            return getWishPrice();
+            return getWishPrice(url);
         }
         return -1.00;
     }
@@ -34,7 +34,7 @@ public class WebServerSocket {
      *
      * @return
      */
-    private double getEbayPrice() {
+    private double getEbayPrice(String urlString) {
         return -1.00;
     }
 
@@ -42,8 +42,8 @@ public class WebServerSocket {
      *
      * @return
      */
-    private double getAmazonPrice() {
-        //Code
+    private double getAmazonPrice(String urlString) {
+
         return -1.00;
     }
 
@@ -51,7 +51,7 @@ public class WebServerSocket {
      *
      * @return
      */
-    private double getWalmartPrice() {
+    private double getWalmartPrice(String urlString) {
         return -1.00;
     }
 
@@ -59,7 +59,7 @@ public class WebServerSocket {
      *
      * @return
      */
-    private double getWishPrice() {
+    private double getWishPrice(String urlString) {
         return -1.00;
     }
 

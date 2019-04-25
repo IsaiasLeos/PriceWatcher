@@ -1,5 +1,6 @@
 package view;
 
+import com.bulenkov.darcula.DarculaLaf;
 import controller.PriceFinder;
 import controller.ProductManager;
 import model.Product;
@@ -7,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -18,9 +20,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.BorderFactory;
@@ -44,6 +50,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.basic.BasicLookAndFeel;
 
 /**
  * A dialog for tracking the price of an item.
@@ -101,9 +109,7 @@ public class Main extends JFrame {
      *
      */
     private void createGUI() {
-        JPanel controlPanel = createControlPanel();
-        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
-        add(controlPanel, BorderLayout.CENTER);
+        createControlPanel();
         JPanel drawingBoard = new JPanel();
         jListRenderer = createJList(defaultListModel);
         mouseListener();
@@ -123,11 +129,11 @@ public class Main extends JFrame {
      * Create a control panel consisting of a Tool Bar, Menu Bar, and a Pop-up
      * Menu.
      */
-    private JPanel createControlPanel() {
+    private void createControlPanel() {
         createJPopupMenu();
         createJMenuBar();
         add(createJToolBar("Toolbar"), BorderLayout.NORTH);
-        return new JPanel();
+
     }
 
     /**
@@ -139,6 +145,7 @@ public class Main extends JFrame {
             try {
                 Thread.sleep(time * 1000);
             } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             if (msg.equals(msgBar.getText())) {
                 SwingUtilities.invokeLater(() -> msgBar.setText(" "));
@@ -232,7 +239,12 @@ public class Main extends JFrame {
         String productName = "Nintendo Switch";
         double productInitialPrice = 359.99;
         String productDateAdded = "1/30/2019";
+        String productURL2 = "https://www.ebay.com/itm/Marvel-Avengers-Endgame-Captain-America-and-Captain-Marvel-2-pack/323775774144?_trkparms=5373%3A0%7C5374%3AFeatured";
+        String productName2 = "Marvel Avengers Toys";
+        double productInitialPrice2 = 59.99;
+        String productDateAdded2 = "1/30/2019";
         originalProductManager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        originalProductManager.add(createProduct(productURL2, productName2, productInitialPrice2, productDateAdded2));
         defaultListModel = createListModel(originalProductManager);
         webPrice = new PriceFinder();
     }
@@ -442,6 +454,7 @@ public class Main extends JFrame {
                     Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
 
                 } catch (URISyntaxException | IOException ex) {
+                    ex.printStackTrace();
                 }
             }
             showMessage("Opening Webpage", time);
@@ -459,6 +472,7 @@ public class Main extends JFrame {
             try {
                 Desktop.getDesktop().browse(new URI(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
             } catch (URISyntaxException | IOException ex) {
+                ex.printStackTrace();
             }
         }
     }
@@ -660,6 +674,23 @@ public class Main extends JFrame {
         return generatedJList;
     }
 
+    private void switchThemes(String theme) {
+        try {
+            if (theme.contains("Dracula")) {
+                javax.swing.UIManager.setLookAndFeel(new DarculaLaf());
+            }
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if (theme.equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+        SwingUtilities.updateComponentTreeUI(this);
+    }
+
     /**
      * Creates a {@link JMenuBar} that contains the creator information, actions
      * for {@link model.Product} and sorting for the JList.
@@ -669,6 +700,27 @@ public class Main extends JFrame {
         JMenu appMenu = new JMenu("App");
         JMenu editMenu = new JMenu("Item");
         JMenu sortMenu = new JMenu("Sort");
+        JMenu themeMenu = new JMenu("Themes");
+
+        JMenuItem themeWindows = new JMenuItem("Windows");
+        themeWindows.addActionListener((event) -> this.switchThemes("Windows"));
+        JMenuItem themeWindowsClassic = new JMenuItem("Windows Classic");
+        themeWindowsClassic.addActionListener((event) -> this.switchThemes("Windows Classic"));
+        JMenuItem themeWindowsMetal = new JMenuItem("Metal");
+        themeWindowsMetal.addActionListener((event) -> this.switchThemes("Metal"));
+        JMenuItem themeWindowsNimbus = new JMenuItem("Nimbus");
+        themeWindowsNimbus.addActionListener((event) -> this.switchThemes("Nimbus"));
+        JMenuItem themeWindowsCDEMotif = new JMenuItem("CDE/Motif");
+        themeWindowsCDEMotif.addActionListener((event) -> this.switchThemes("CDE/Motif"));
+        themeWindowsNimbus.addActionListener((event) -> this.switchThemes("Nimbus"));
+        JMenuItem themeWindowsDracula = new JMenuItem("Dracula");
+        themeWindowsDracula.addActionListener((event) -> this.switchThemes("Dracula"));
+        themeMenu.add(themeWindows);
+        themeMenu.add(themeWindowsClassic);
+        themeMenu.add(themeWindowsMetal);
+        themeMenu.add(themeWindowsNimbus);
+        themeMenu.add(themeWindowsCDEMotif);
+        themeMenu.add(themeWindowsDracula);
         JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
         about.addActionListener((event) -> this.aboutButtonClicked(event));
         appMenu.add(about);
@@ -744,6 +796,7 @@ public class Main extends JFrame {
         fileMenuBar.add(appMenu);
         fileMenuBar.add(editMenu);
         fileMenuBar.add(sortMenu);
+        fileMenuBar.add(themeMenu);
         setJMenuBar(fileMenuBar);
     }
 
