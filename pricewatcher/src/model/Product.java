@@ -40,7 +40,10 @@ public class Product {
         this.productPrice = initialPrice;
         this.addedDate = addedDate;
         this.productIcon = getProductIcon("webbrowser.png");
-
+        if (this.productURL.contains("amazon")) {
+            System.out.println("AMAZON");
+            urlCheck();
+        }
     }
 
     /**
@@ -220,6 +223,26 @@ public class Product {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void urlCheck() {
+        String[] sanitize = productURL.split("/");
+        String newUrl = "";
+        for (int i = 0; i < sanitize.length; i++) {
+            if (sanitize[i].contains("ref") && !sanitize[i].contains("?ref")) {
+                sanitize[i] = "";
+            }
+            if (sanitize[i].contains("?ref")) {
+                String[] fixURL = sanitize[i].split("[?]");
+                sanitize[i] = fixURL[0];
+            }
+            if (sanitize[i].equals("/")) {
+                sanitize[i] = "";
+            }
+            newUrl += sanitize[i] + "/";
+            System.out.println(newUrl);
+        }
+        setCurrentURL(newUrl);
     }
 
 }

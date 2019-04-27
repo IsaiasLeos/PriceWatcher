@@ -7,14 +7,17 @@ package controller;
  */
 public class PriceFinder extends WebServerSocket {
 
+    public PriceFinder() {
+    }
+
     /**
      * Generate a simulated price of an item between $300.00-$400.00.
      *
      * @param url
      * @return random double between 300 - 400
      */
-    public double getSimulatedPrice(String url) {
-        //Temporary Check | TODO Remove
-        return super.checkURL(url);
+    public double getOnlinePrice(String url) {
+        checkURL(url);
+        return -1.00;
     }
 }

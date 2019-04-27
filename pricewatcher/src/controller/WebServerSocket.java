@@ -1,5 +1,14 @@
 package controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+
 /**
  *
  * @author Isaias Leos, Leslie Gomez
@@ -24,18 +33,53 @@ public class WebServerSocket {
             return getAmazonPrice(url);
         } else if (url.contains("walmart")) {
             return getWalmartPrice(url);
-        } else if (url.contains("wish")) {
-            return getWishPrice(url);
+        } else {
+            return -1.00;
+        }
+    }
+
+    /**
+     *
+     * @return the price of an item that is from Ebay
+     */
+    private double getEbayPrice(String urlString) {
+        HttpURLConnection con = null;
+        Pattern pattern = null;
+        String output = "";
+        try {
+            URL url = new URL(urlString);
+            con = (HttpURLConnection) url.openConnection();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output = getPrice(line);
+                    if (!output.equals("") && line.contains("notranslate")) {
+                        System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return -1.00;
     }
 
     /**
+     * Obtains the price of an item using RegEx.
      *
-     * @return
+     * @param input the raw string
+     * @return possible matches of prices within the raw string
      */
-    private double getEbayPrice(String urlString) {
-        return -1.00;
+    private static String getPrice(String input) {
+        String output = "";
+        //Contains $, Followed by Digits, then a period or any number of digits before the period.
+        //After the period any number of digits
+        Pattern pattern = Pattern.compile("[$](([1-9]+\\.?\\d*)|([0]\\.\\d*)|[0])");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            output = matcher.group();
+        }
+        return output;
     }
 
     /**
@@ -44,6 +88,33 @@ public class WebServerSocket {
      */
     private double getAmazonPrice(String urlString) {
 
+        HttpURLConnection con = null;
+        String output = "";
+        try {
+            URL url = new URL(urlString);
+            con = (HttpURLConnection) url.openConnection();
+            String encoding = con.getContentEncoding();
+            if (encoding == null) {
+                encoding = "utf-8";
+            }
+            InputStreamReader reader = null;
+            if ("gzip".equals(encoding)) {
+                reader = new InputStreamReader(new GZIPInputStream(con.getInputStream()));
+            } else {
+                reader = new InputStreamReader(con.getInputStream(), encoding);
+            }
+            BufferedReader in = new BufferedReader(reader);
+            String line;
+            while ((line = in.readLine()) != null) {
+                output = getPrice(line);
+                if (!output.equals("") && line.contains("priceBlockBuyingPriceString") || line.contains("priceBlockDealPriceString")) {
+                    System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                }
+            }
+            System.out.println("Done");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return -1.00;
     }
 
@@ -52,14 +123,24 @@ public class WebServerSocket {
      * @return
      */
     private double getWalmartPrice(String urlString) {
-        return -1.00;
-    }
-
-    /**
-     *
-     * @return
-     */
-    private double getWishPrice(String urlString) {
+        HttpURLConnection con = null;
+        Pattern pattern = null;
+        String output = "";
+        try {
+            URL url = new URL(urlString);
+            con = (HttpURLConnection) url.openConnection();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output = getPrice(line);
+                    if (!output.equals("") && !line.contains("$0")) {
+                        System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return -1.00;
     }
 

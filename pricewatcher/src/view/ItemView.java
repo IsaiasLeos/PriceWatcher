@@ -27,16 +27,6 @@ import javax.swing.JPanel;
 public class ItemView extends JPanel {
 
     private Product product;
-    private Image itemImage;
-    private String theme = "Metal";
-
-    public String getTheme() {
-        return theme;
-    }
-
-    public void setTheme(String theme) {
-        this.theme = theme;
-    }
 
     public final Dimension dim = new Dimension(0, 160);
 
@@ -143,21 +133,5 @@ public class ItemView extends JPanel {
      */
     public void setProduct(Product product) {
         this.product = product;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Image getItemImage() {
-        return itemImage;
-    }
-
-    /**
-     *
-     * @param itemIcon
-     */
-    public void setItemImage(Image itemIcon) {
-        this.itemImage = itemIcon;
     }
 }
