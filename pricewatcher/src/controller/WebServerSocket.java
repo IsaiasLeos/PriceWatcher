@@ -15,6 +15,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class WebServerSocket {
 
+    public boolean isDone = false;
+
     public WebServerSocket() {
 
     }
@@ -34,7 +36,7 @@ public class WebServerSocket {
         } else if (url.contains("walmart")) {
             return getWalmartPrice(url);
         } else {
-            return -1.00;
+            return -1;
         }
     }
 
@@ -44,7 +46,6 @@ public class WebServerSocket {
      */
     private double getEbayPrice(String urlString) {
         HttpURLConnection con = null;
-        Pattern pattern = null;
         String output = "";
         try {
             URL url = new URL(urlString);
@@ -54,10 +55,11 @@ public class WebServerSocket {
                 while ((line = reader.readLine()) != null) {
                     output = getPrice(line);
                     if (!output.equals("") && line.contains("notranslate")) {
-                        System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                        return Double.parseDouble(output.substring(1, output.length()));
                     }
                 }
             }
+            System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,7 +89,6 @@ public class WebServerSocket {
      * @return
      */
     private double getAmazonPrice(String urlString) {
-
         HttpURLConnection con = null;
         String output = "";
         try {
@@ -108,7 +109,7 @@ public class WebServerSocket {
             while ((line = in.readLine()) != null) {
                 output = getPrice(line);
                 if (!output.equals("") && line.contains("priceBlockBuyingPriceString") || line.contains("priceBlockDealPriceString")) {
-                    System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                    return Double.parseDouble(output.substring(1, output.length()));
                 }
             }
             System.out.println("Done");
@@ -124,7 +125,6 @@ public class WebServerSocket {
      */
     private double getWalmartPrice(String urlString) {
         HttpURLConnection con = null;
-        Pattern pattern = null;
         String output = "";
         try {
             URL url = new URL(urlString);
@@ -134,10 +134,11 @@ public class WebServerSocket {
                 while ((line = reader.readLine()) != null) {
                     output = getPrice(line);
                     if (!output.equals("") && !line.contains("$0")) {
-                        System.out.println(Double.parseDouble(output.substring(1, output.length())));
+                        return Double.parseDouble(output.substring(1, output.length()));
                     }
                 }
             }
+            System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();
         }

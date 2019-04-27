@@ -53,9 +53,9 @@ public class ItemView extends JPanel {
         int x = 20, y = 10;
         g.drawImage(product.getProductIcon(), x, y, this);
         y += 24 + 20;
-        g.drawString(textAttrManipulation("Name:      ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
+        g.drawString(textAttrManipulation("Name:     ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
-        g.drawString(textAttrManipulation("URL:         " + product.getProductURL(), " ", Font.PLAIN, Color.BLACK), x, y);
+        g.drawString(textAttrManipulation("URL:        " + product.getProductURL(), " ", Font.PLAIN, Color.BLACK), x, y);
         y += 20;
         g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
         y += 20;

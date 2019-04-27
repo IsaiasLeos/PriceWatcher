@@ -41,7 +41,6 @@ public class Product {
         this.addedDate = addedDate;
         this.productIcon = getProductIcon("webbrowser.png");
         if (this.productURL.contains("amazon")) {
-            System.out.println("AMAZON");
             urlCheck();
         }
     }
@@ -59,8 +58,7 @@ public class Product {
      */
     public void checkPrice(double newPrice) {
         setProductPrice(newPrice);
-        setChange(new BigDecimal(calculateProductChange(getInitialPrice(),
-                getProductPrice())).setScale(2, RoundingMode.CEILING).doubleValue());
+        setChange(new BigDecimal(calculateProductChange(getInitialPrice(), getProductPrice())).setScale(2, RoundingMode.CEILING).doubleValue());
         sound = 1;
     }
 
@@ -240,7 +238,6 @@ public class Product {
                 sanitize[i] = "";
             }
             newUrl += sanitize[i] + "/";
-            System.out.println(newUrl);
         }
         setCurrentURL(newUrl);
     }

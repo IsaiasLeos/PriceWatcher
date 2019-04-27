@@ -218,7 +218,7 @@ public class Main extends JFrame {
         String productDateAdded = "1/30/2019";
         String productURL2 = "https://www.ebay.com/itm/Marvel-Avengers-Endgame-Captain-America-and-Captain-Marvel-2-pack/323775774144?_trkparms=5373%3A0%7C5374%3AFeatured";
         String productName2 = "Marvel Avengers Toys";
-        double productInitialPrice2 = 59.99;
+        double productInitialPrice2 = 10.99;
         String productDateAdded2 = "1/30/2019";
         String productURL3 = "https://www.walmart.com/ip/Sekiro-Shadows-Die-Twice-Activision-PlayStation-4-047875882928/192581096";
         String productName3 = "Sekiro: Shadows Die Twice";
@@ -239,14 +239,29 @@ public class Main extends JFrame {
     private void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
-                defaultListModel.get(i).checkPrice(webPrice.getOnlinePrice(defaultListModel.get(i).getProductURL()));
+                refreshThread(defaultListModel.get(i));
             }
-            repaint();
             showMessage("Refreshing", 4);
         } else {
             showMessage("Product List is Empty", 4);
         }
 
+    }
+
+    /**
+     *
+     * @param product
+     */
+    private void refreshThread(Product product) {
+        new Thread(() -> {
+            try {
+                product.checkPrice(webPrice.getPrice(product.getProductURL()));
+                Thread.sleep(1000);
+                repaint();
+            } catch (InterruptedException error) {
+                error.printStackTrace();
+            }
+        }).start();
     }
 
     /**
@@ -257,7 +272,7 @@ public class Main extends JFrame {
     @SuppressWarnings("deprecation")
     private void singleRefreshButtonClicked(ActionEvent event) {
         if (jListRenderer.getSelectedIndex() > -1) {
-            defaultListModel.get(jListRenderer.getSelectedIndex()).checkPrice(webPrice.getOnlinePrice(defaultListModel.get(jListRenderer.getSelectedIndex()).getProductURL()));
+            refreshThread(defaultListModel.get(jListRenderer.getSelectedIndex()));
             repaint();
             showMessage("Refreshing", 4);
         } else {
@@ -288,7 +303,7 @@ public class Main extends JFrame {
         if (option == 0) {
             try {
 
-                Product generatedProduct = createProduct(url.getText(), name.getText(), webPrice.getOnlinePrice(url.getText()), getCurrentDate());
+                Product generatedProduct = createProduct(url.getText(), name.getText(), webPrice.getPrice(url.getText()), getCurrentDate());
                 defaultListModel.addElement(generatedProduct);
                 showMessage("Product Successfully Added", 4);
             } catch (NumberFormatException e) {
@@ -305,6 +320,7 @@ public class Main extends JFrame {
         if (option == -1) {
 
         }
+        repaint();
     }
 
     /**
