@@ -49,6 +49,14 @@ public class Product {
         }
     }
 
+    /**
+     * Alternative constructor for the product with given information.
+     *
+     * @param url
+     * @param name
+     * @param startingPrice
+     * @param date
+     */
     public Product(String url, String name, double startingPrice, String date) {
         this.url = url;
         this.name = name;

@@ -5,7 +5,6 @@
  */
 package storage;
 
-import model.Product;
 import controller.ProductManager;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,7 +37,7 @@ public class StorageManager extends ProductManager {
      * @param arr
      */
     public void toStorage(JSONArray arr) {
-        try ( FileWriter file = new FileWriter(new File("src/resources/products.json"))) {
+        try (FileWriter file = new FileWriter(new File("src/resources/products.json"))) {
             file.write(arr.toString());
         } catch (IOException ex) {
             Logger.getLogger(StorageManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -46,20 +45,19 @@ public class StorageManager extends ProductManager {
     }
 
     public void fromJSON() throws FileNotFoundException {
-
         JSONTokener tokener = new JSONTokener(new FileInputStream(new File("src/resources/products.json")));
         JSONArray productListJSON = new JSONArray(tokener);
-        JSONObject productJSON;
+
         for (int i = 0; i < productListJSON.length(); i++) {
-            productJSON = productListJSON.getJSONObject(i);
-            Product creationProduct = new Product();
-            creationProduct.setDate(productJSON.getString("date"));
-            creationProduct.setCurrentPrice(productJSON.getInt("currentPrice"));
-            creationProduct.setStartingPrice(productJSON.getInt("startingPrice"));
-            creationProduct.setName(productJSON.getString("name"));
-            creationProduct.setURL(productJSON.getString("URL"));
-            creationProduct.setChange(productJSON.getInt("change"));
-            add(creationProduct);
+            JSONObject productJSON = productListJSON.getJSONObject(i);
+            create(productJSON.getString("name"),
+                    productJSON.getString("date"),
+                    productJSON.getInt("currentPrice"),
+                    productJSON.getInt("startingPrice"),
+                    productJSON.getString("URL"),
+                    productJSON.getInt("change")
+            );
         }
+
     }
 }

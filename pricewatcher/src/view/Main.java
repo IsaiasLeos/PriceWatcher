@@ -3,18 +3,15 @@ package view;
 import controller.PriceFinder;
 import storage.StorageManager;
 import model.Product;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
@@ -36,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -51,34 +47,11 @@ import utils.Sorting;
 @SuppressWarnings("serial")
 public class Main extends uiMain {
 
+    private DefaultListModel<Product> defaultListModel;
     private StorageManager storageManager;
     private Sorting sortAlgorithm;
-    private Dimension itemViewDim;
-    private JProgressBar download = new JProgressBar();
-
-    /**
-     * Create a Dialog of Default Size (600,400).
-     */
-    public Main() {
-        this(new Dimension(600, 400));
-    }
-
-    /**
-     * Create a new dialog of the given Dimensions (600,400).
-     *
-     * @param dim
-     */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Main(Dimension dim) {
-        createUI();
-        setSize(dim);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setResizable(true);
-        showMessage("Welcome!", 4);
-        pack();
-        setVisible(true);
-    }
+    private JPopupMenu popupmenu;
+    private JList viewListCell;
 
     /**
      * Create and Configure the GUI.
@@ -86,13 +59,13 @@ public class Main extends uiMain {
      */
     @Override
     protected void createUI() {
-        JPopupMenu jPopMenu = createJPopupMenu();
         JPanel drawingBoard = new JPanel();
-        sortAlgorithm = new Sorting();
+        this.sortAlgorithm = new Sorting();
+        popupmenu = createJPopupMenu();
         storageManager = new StorageManager();
         defaultListModel = createListModel(storageManager);
         viewListCell = createJList(defaultListModel);
-        viewListCell.addMouseListener(mouseListener(jPopMenu));
+        viewListCell.addMouseListener(mouseListener());
         viewListCell.addMouseMotionListener(mouseMotionListener());
         viewListCell.setVisibleRowCount(3);
         drawingBoard.add(new JScrollPane(viewListCell));
@@ -108,25 +81,18 @@ public class Main extends uiMain {
     }
 
     /**
-     * Show briefly the given string in the message bar.
-     */
-    @Override
-    protected void showMessage(String msg, int time) {
-        super.showMessage(msg, time);
-    }
-
-    /**
      * Listen to when the mouse is either right clicking or left clicking on the
      * JList.
      *
-     * @param mouseEvent
+     * @return
      */
-    private MouseAdapter mouseListener(JPopupMenu jPopMenu) {
+    @Override
+    protected MouseAdapter mouseListener() {
         return new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    jPopMenu.show(viewListCell, mouseEvent.getX(), mouseEvent.getY());
+                    popupmenu.show(viewListCell, mouseEvent.getX(), mouseEvent.getY());
                 }
                 if (mouseEvent.getClickCount() == 1) {
                     for (int i = 0; i < defaultListModel.getSize(); i++) {
@@ -134,7 +100,7 @@ public class Main extends uiMain {
                                 && mouseEvent.getX() > 22
                                 && mouseEvent.getY() < 32 + (i * 160)
                                 && mouseEvent.getY() > 12 + (i * 160)) {
-                            openClickableActionWeb(viewListCell.getSelectedIndex());
+                            openClickableActionWeb();
                         }
                     }
                 }
@@ -150,7 +116,47 @@ public class Main extends uiMain {
      */
     @Override
     protected MouseMotionListener mouseMotionListener() {
-        return super.mouseMotionListener();
+        return new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (e.getX() < 40
+                        && e.getX() > 22
+                        && e.getY() < 32 + (viewListCell.getSelectedIndex() * 160)
+                        && e.getY() > 12 + (viewListCell.getSelectedIndex() * 160)
+                        && viewListCell.getSelectedIndex() != -1) {
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("ebay")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("ebay.png");
+                    }
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("amazon")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("amazon.png");
+                    }
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("walmart")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("walmart.png");
+                    }
+                    repaint();
+                } else if (viewListCell.getSelectedIndex() > -1) {
+                    defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("webbrowser.png");
+                    repaint();
+                }
+            }
+        };
+    }
+
+    /**
+     * Create a {@link model.Product} given the parameters.
+     *
+     * @param itemURL the URL that links to the item
+     * @param itemName the name of the product
+     * @param itemPrice the initial price of the item
+     * @param itemDateAdded the date of when the product was added
+     * @return
+     */
+    private Product createProduct(String itemURL, String itemName, String itemDateAdded) {
+        return new Product(itemURL, itemName, itemDateAdded);
     }
 
     /**
@@ -180,32 +186,27 @@ public class Main extends uiMain {
                     }
                 }
             } else {
-                if (product.getStartingPrice() == 0) {
-                    product.setStartingPrice(price);
-                    product.setCurrentPrice(price);
-                } else {
-                    product.checkPrice(price);
+                try {
+                    if (product.getStartingPrice() == 0) {
+                        product.setStartingPrice(price);
+                        product.setCurrentPrice(price);
+                    } else {
+                        product.checkPrice(price);
+                    }
+                    Thread.sleep(500);
+                    storageManager.toStorage(storageManager.toJSON());
+                    repaint();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                storageManager.toStorage(storageManager.toJSON());
-                repaint();
             }
         }).start();
     }
 
     /**
-     * Gets the current date.
-     *
-     * @return current date in MM/dd/yyyy format
-     *
-     */
-    @Override
-    protected String getCurrentDate() {
-        return super.getCurrentDate();
-    }
-
-    /**
      * Refreshes the list of products given within the {@link JList}
      *
+     * @param event
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -225,7 +226,9 @@ public class Main extends uiMain {
     /**
      * Refreshes the selected index inside of the {@link JList}
      *
+     * @param event
      */
+    @SuppressWarnings("deprecation")
     @Override
     protected void singleRefreshButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
@@ -249,18 +252,22 @@ public class Main extends uiMain {
         JTextField url = new JTextField();
         JTextField price = new JTextField("0.0");
         price.setEditable(false);
-        Object[] message = {"Product Name:", name, "Product URL:", url, "Product Price:", price};
+        Object[] message = {
+            "Product Name:", name,
+            "Product URL:", url,
+            "Product Price:", price
+        };
         int option = JOptionPane.showConfirmDialog(
                 this,
                 message,
                 "Add",
                 JOptionPane.OK_CANCEL_OPTION,
                 0,
-                new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                        + "plus.png")));
+                new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+        //OK
         if (option == 0) {
             try {
-                Product generatedProduct = new Product(url.getText(), name.getText(), getCurrentDate());
+                Product generatedProduct = createProduct(url.getText(), name.getText(), getCurrentDate());
                 setPrice(generatedProduct);
                 defaultListModel.addElement(generatedProduct);
                 storageManager.add(generatedProduct);
@@ -271,6 +278,14 @@ public class Main extends uiMain {
                 showMessage("Please re-enter correct information.", 4);
             }
         }
+        //Cancel 
+        if (option == 2) {
+
+        }
+        //Closed
+        if (option == -1) {
+
+        }
         repaint();
     }
 
@@ -278,6 +293,7 @@ public class Main extends uiMain {
      * Searches for the {@link model.Product} Name and displays product that
      * contain the same letters while ignoring capitalization.
      *
+     * @param event
      */
     @Override
     protected void searchButtonClicked(ActionEvent event) {
@@ -291,8 +307,7 @@ public class Main extends uiMain {
                 "Add",
                 JOptionPane.OK_CANCEL_OPTION,
                 0,
-                new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                        + "plus.png")));
+                new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
         if (option == 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
                 if (defaultListModel.get(i).getName().toLowerCase().contains(search.getText().toLowerCase())) {
@@ -304,36 +319,14 @@ public class Main extends uiMain {
     }
 
     /**
-     * Moves to the top of cell within the {@link JList}.
-     */
-    @Override
-    protected void moveUpButtonClicked(ActionEvent event) {
-        super.moveUpButtonClicked(event);
-    }
-
-    /**
-     * Moves to the last of the cell within the {@link JList}.
-     *
-     */
-    @Override
-    protected void moveDownButtonClicked(ActionEvent event) {
-        super.moveDownButtonClicked(event);
-    }
-
-    /**
      * Deletes the currently selected cell within the {@link JList}.
+     *
+     * @param event
      */
     @Override
     protected void deleteButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
-            int selected = JOptionPane.showConfirmDialog(
-                    this,
-                    "Do you want to delete this item?",
-                    "Delete",
-                    JOptionPane.YES_NO_OPTION,
-                    0,
-                    new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                            + "delete.png")));
+            int selected = JOptionPane.showConfirmDialog(this, "Do you want to delete this item?", "Delete", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "delete.png")));
             if (selected == 0) {
                 storageManager.delete(viewListCell.getSelectedIndex());
                 defaultListModel.remove(viewListCell.getSelectedIndex());
@@ -346,10 +339,11 @@ public class Main extends uiMain {
     }
 
     /**
-     * Edits the currently selected cell within the {@link JList}.While editing,
-     * the current information of the selected cell's product will be displayed
-     * within the {@link JOptionPane} given.
+     * Edits the currently selected cell within the {@link JList}. While
+     * editing, the current information of the selected cell's product will be
+     * displayed within the {@link JOptionPane} given.
      *
+     * @param event
      */
     @Override
     protected void editButtonClicked(ActionEvent event) {
@@ -370,8 +364,7 @@ public class Main extends uiMain {
                     "Edit",
                     JOptionPane.PLAIN_MESSAGE,
                     0,
-                    new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                            + "edit.png")));
+                    new ImageIcon(getClass().getClassLoader().getResource("resources/" + "edit.png")));
             if (option == 0) {
                 try {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setName(name.getText());
@@ -383,40 +376,73 @@ public class Main extends uiMain {
                     showMessage("Please re-enter correct information.", 4);
                 }
             }
+            //Close Button
+            if (option == -1) {
+
+            }
+            //Cancel
+            if (option == 2) {
+
+            }
         } else {
             showMessage("Not Selecting an Item", 4);
         }
     }
 
     /**
-     * Redirects the user to the {@link URI} of the currently selected cell or
-     * {@link model.Product}
      *
-     * @param selectedIndex
      */
-    @Override
-    protected void openClickableActionWeb(int selectedIndex) {
-        super.openClickableActionWeb(selectedIndex);
-    }
+    protected void openClickableActionWeb() {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(defaultListModel.get(viewListCell.getSelectedIndex()).getURL()));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        showMessage("Opening Webpage", 4);
 
-    /**
-     * Shows a {@link JLabel} with the information of who worked on this project
-     * and a link to the source code.
-     *
-     */
-    @Override
-    protected void aboutButtonClicked(ActionEvent event) {
-        super.aboutButtonClicked(event);
     }
 
     /**
      * Exits the program.
      *
      */
-    protected void exitButtonClicked() {
-        dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+    @Override
+    protected void exitButtonClicked(ActionEvent event) {
+        super.exitButtonClicked(event);
     }
 
+    @Override
+    protected void moveDownButtonClicked(ActionEvent event) {
+        int size = defaultListModel.getSize();
+        if (size > -1) {
+            viewListCell.setSelectedIndex(size);
+        }
+    }
+
+    @Override
+    protected void moveUpButtonClicked(ActionEvent event) {
+        if (defaultListModel.getSize() > -1) {
+            viewListCell.setSelectedIndex(0);
+        }
+    }
+
+    /**
+     * Creates a {@link JToolBar} with the given buttons.
+     * <li>{@link #refreshButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #addButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #searchButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #moveUpButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #moveDownButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #singleRefreshButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #openWeb(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #deleteButtonClicked(java.awt.event.ActionEvent)}</li>
+     * <li>{@link #editButtonClicked(java.awt.event.ActionEvent) }</li>
+     *
+     * @return JToolBar
+     */
+    @Override
     /**
      * Creates a {@link JToolBar} with the given
      * buttons.<li>{@link #refreshButtonClicked(java.awt.event.ActionEvent)}</li>
@@ -432,7 +458,6 @@ public class Main extends uiMain {
      * @param title
      * @return JToolBar
      */
-    @Override
     protected JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
         JButton checkmark = createJButton("checkmark.png", "Check Item Prices");
@@ -455,7 +480,7 @@ public class Main extends uiMain {
         singleRefresh.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         toolBar.add(singleRefresh);
         JButton openLink = createJButton("webbrowser.png", "Open in Browser");
-        openLink.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        openLink.addActionListener((event) -> this.openClickableActionWeb());
         toolBar.add(openLink);
         JButton delete = createJButton("delete.png", "Delete Selected Item");
         delete.addActionListener((event) -> this.deleteButtonClicked(event));
@@ -468,6 +493,18 @@ public class Main extends uiMain {
         about.addActionListener((event) -> this.aboutButtonClicked(event));
         toolBar.add(about);
         return toolBar;
+    }
+
+    /**
+     * Create a button with the given label and tool-tip.
+     *
+     * @param label name of the resource (image)
+     * @param tooltip
+     * @return a button
+     */
+    @Override
+    protected JButton createJButton(String label, String tooltip) {
+        return super.createJButton(label, tooltip);
     }
 
     /**
@@ -487,7 +524,7 @@ public class Main extends uiMain {
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         generatedPopupMenu.add(price);
         JMenuItem view = createJMenutItem("View", "webbrowser.png", "View Item in Browser");
-        view.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        view.addActionListener((event) -> this.openClickableActionWeb());
         generatedPopupMenu.add(view);
         JMenuItem edit = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         edit.addActionListener((event) -> this.editButtonClicked(event));
@@ -497,17 +534,17 @@ public class Main extends uiMain {
         generatedPopupMenu.add(remove);
         generatedPopupMenu.addSeparator();
         JMenu generatedNestedMenu = new JMenu("Filter");
-        JMenuItem amazonMenu = createJMenutItem("Amazon", "amazon.png", "Filter by Amazon Links");
-        amazonMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("amazon"));
-        generatedNestedMenu.add(amazonMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
-        JMenuItem ebayMenu = createJMenutItem("eBay", "ebay.png", "Filter by eBay Links");
-        ebayMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("ebay"));
-        generatedNestedMenu.add(ebayMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
-        JMenuItem walmartMenu = createJMenutItem("Walmart", "walmart.png", "Filter by Walmart Links");
-        walmartMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("walmart"));
-        generatedNestedMenu.add(walmartMenu);
+//        JMenuItem amazonMenu = createJMenutItem("Amazon", "amazon.png", "Filter by Amazon Links");
+//        amazonMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("amazon"));
+//        generatedNestedMenu.add(amazonMenu);
+//        generatedPopupMenu.add(generatedNestedMenu);
+//        JMenuItem ebayMenu = createJMenutItem("eBay", "ebay.png", "Filter by eBay Links");
+//        ebayMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("ebay"));
+//        generatedNestedMenu.add(ebayMenu);
+//        generatedPopupMenu.add(generatedNestedMenu);
+//        JMenuItem walmartMenu = createJMenutItem("Walmart", "walmart.png", "Filter by Walmart Links");
+//        walmartMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("walmart"));
+//        generatedNestedMenu.add(walmartMenu);
         generatedPopupMenu.add(generatedNestedMenu);
         generatedPopupMenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
@@ -528,7 +565,7 @@ public class Main extends uiMain {
      * @param storageManager
      * @return
      */
-    private DefaultListModel createListModel(StorageManager storageManager) {
+    public DefaultListModel createListModel(StorageManager storageManager) {
         DefaultListModel generatedListModel = new DefaultListModel<>();
         try {
             storageManager.fromJSON();
@@ -547,11 +584,7 @@ public class Main extends uiMain {
      */
     @Override
     protected JList createJList(DefaultListModel defaultListModel) {
-        JList generatedJList = new JList<>(defaultListModel);
-        Renderer renderView = new Renderer();
-        itemViewDim = renderView.dim;
-        generatedJList.setCellRenderer(renderView);
-        return generatedJList;
+        return super.createJList(defaultListModel);
     }
 
     /**
@@ -576,8 +609,6 @@ public class Main extends uiMain {
     /**
      * Creates a {@link JMenuBar} that contains the creator information, actions
      * for {@link model.Product} and sorting for the JList.
-     *
-     * @return
      */
     private JMenuBar createJMenuBar() {
         JMenuBar fileMenuBar = new JMenuBar();
@@ -604,7 +635,7 @@ public class Main extends uiMain {
         about.addActionListener((event) -> this.aboutButtonClicked(event));
         appMenu.add(about);
         JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
-        exit.addActionListener((event) -> this.exitButtonClicked());
+        exit.addActionListener((event) -> this.exitButtonClicked(event));
         exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
         appMenu.add(exit);
 
@@ -616,10 +647,10 @@ public class Main extends uiMain {
         add.addActionListener((event) -> this.addButtonClicked(event));
         editMenu.add(add);
         editMenu.add(new JSeparator());
-        JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
-        search.addActionListener((event) -> this.searchButtonClicked(event));
-        search.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "search.png")));
-        editMenu.add(search);
+//        JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
+//        search.addActionListener((event) -> this.searchButtonClicked(event));
+//        search.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "search.png")));
+//        editMenu.add(search);
         JMenuItem forward = createJMenuItem("Select First", "Move to First Item", "up.png", KeyEvent.VK_UP, ActionEvent.ALT_MASK);
         forward.addActionListener((event) -> this.moveUpButtonClicked(event));
         editMenu.add(forward);
@@ -670,7 +701,7 @@ public class Main extends uiMain {
         priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         generatedNestedMenu.add(priceNested);
         JMenuItem viewNested = createJMenutItem("View", "webbrowser.png", "View Item on Browser");
-        viewNested.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        viewNested.addActionListener((event) -> this.openClickableActionWeb());
         generatedNestedMenu.add(viewNested);
         JMenuItem editNested = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         editNested.addActionListener((event) -> this.editButtonClicked(event));
@@ -729,29 +760,15 @@ public class Main extends uiMain {
 
     /**
      * Creates a {@link JMenuItem} with the given parameter of a label from the
-     * name of the button, name of the image file, and tool tip description.Used
-     * to create a JMenuBar.
+     * name of the button, name of the image file, and tool tip description.
+     * Used to create a JMenuBar.
      *
      * @param label
-     * @param imageName
-     * @param tooltip
      * @return the JMenuItem
      */
     @Override
     protected JMenuItem createJMenutItem(String label, String imageName, String tooltip) {
         return super.createJMenutItem(label, imageName, tooltip);
-    }
-
-    /**
-     * Create a button with the given label and tool-tip.
-     *
-     * @param label name of the resource (image)
-     * @param tooltip
-     * @return a button
-     */
-    @Override
-    protected JButton createJButton(String label, String tooltip) {
-        return super.createJButton(label, tooltip);
     }
 
     public static void main(String[] args) {

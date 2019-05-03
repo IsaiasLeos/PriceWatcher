@@ -16,7 +16,7 @@ import java.util.zip.GZIPInputStream;
 public class WebServerSocket {
 
     /**
-     * 
+     *
      */
     public WebServerSocket() {
     }
@@ -65,11 +65,10 @@ public class WebServerSocket {
     private double scrapeEbay(String urlString) {
         HttpURLConnection con = null;
         String priceOutput = "";
-        String titleOutput = "";
         try {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();
-            try ( BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     priceOutput = findPrice(line);
@@ -109,7 +108,7 @@ public class WebServerSocket {
             String line;
             while ((line = in.readLine()) != null) {
                 output = findPrice(line);
-                if (!output.equals("") && line.contains("priceBlockBuyingPriceString") || line.contains("priceBlockDealPriceString")) {
+                if (!output.equals("") && line.contains("priceBlockBuyingPriceString") || line.contains("priceBlockDealPriceString") || line.contains("a-size-medium a-color-price priceBlockBenefitPriceString")) {
                     return Double.parseDouble(output.substring(1, output.length()));
                 }
             }
@@ -130,11 +129,11 @@ public class WebServerSocket {
         try {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();
-            try ( BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output = findPrice(line);
-                    if (!output.equals("") && !line.contains("$0")) {
+                    if (!output.equals("") && !output.contains("$0")) {
                         return Double.parseDouble(output.substring(1, output.length()));
                     }
                 }
@@ -145,5 +144,5 @@ public class WebServerSocket {
         }
         return -1.00;
     }
-
+    
 }

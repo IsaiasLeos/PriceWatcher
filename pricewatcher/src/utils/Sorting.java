@@ -127,15 +127,6 @@ public class Sorting {
         defaultListModel.addAll(products);
     }
 
-    public void filterBy(String name) {
-//        List<Product> products = storageManager.getProducts();
-//        products.removeIf(s -> !s.getProductURL().contains(name));
-//        storageManager.setProducts(products);
-//        defaultListModel.removeAllElements();
-//        defaultListModel.addAll(products);
-//        filter = true;
-    }
-
     private void removeFilterBy() {
 
     }

@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -54,12 +53,12 @@ import javax.swing.SwingUtilities;
 public class uiMain extends JFrame {
 
     protected JLabel msgBar = new JLabel("");
-    protected JList viewListCell;
-    protected JPopupMenu popupMenu;
-    protected DefaultListModel<Product> defaultListModel;
-    protected Renderer renderer;
-    protected ProductManager originalProductManager;
-    protected PriceFinder webPrice;
+    private JList viewListCell;
+    private DefaultListModel<Product> defaultListModel;
+    private JPopupMenu popupMenu;
+    private Renderer renderer;
+    private ProductManager originalProductManager;
+    private PriceFinder webPrice;
 
     /**
      * Create a Dialog of Default Size (600,400).
@@ -80,13 +79,13 @@ public class uiMain extends JFrame {
         setLayout(new BorderLayout());
         setSize(dim);
         createUI();
+        setSize(dim);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
         setResizable(true);
         showMessage("Welcome!", 4);
         pack();
+        setVisible(true);
     }
 
     /**
@@ -161,7 +160,7 @@ public class uiMain extends JFrame {
                                 && mouseEvent.getX() > 22
                                 && mouseEvent.getY() < 32 + (i * 160)
                                 && mouseEvent.getY() > 12 + (i * 160)) {
-                            openClickableActionWeb(viewListCell.getSelectedIndex());
+                            openClickableActionWeb();
                         }
                     }
                 }
@@ -360,9 +359,9 @@ public class uiMain extends JFrame {
      * @param event
      */
     protected void moveDownButtonClicked(ActionEvent event) {
-        if (defaultListModel.getSize() > -1) {
-            viewListCell.setSelectedIndex(defaultListModel.getSize() - 1);
-
+        int size = defaultListModel.getSize();
+        if (size > -1) {
+            viewListCell.setSelectedIndex(size);
         }
     }
 
@@ -430,19 +429,15 @@ public class uiMain extends JFrame {
      *
      * @param selectedIndex
      */
-    protected void openClickableActionWeb(int selectedIndex) {
-        if (selectedIndex > -1) {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    Desktop.getDesktop().browse(new URI(defaultListModel.get(selectedIndex).getURL()));
-                } catch (URISyntaxException | IOException e) {
-                    e.printStackTrace();
-                }
+    protected void openClickableActionWeb() {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(defaultListModel.get(viewListCell.getSelectedIndex()).getURL()));
+            } catch (URISyntaxException | IOException e) {
+                e.printStackTrace();
             }
-            showMessage("Opening Webpage", 4);
-        } else {
-            showMessage("Not Selecting an Item", 4);
         }
+        showMessage("Opening Webpage", 4);
     }
 
     /**
@@ -566,7 +561,7 @@ public class uiMain extends JFrame {
         singleRefresh.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         toolBar.add(singleRefresh);
         JButton openLink = createJButton("webbrowser.png", "Open in Browser");
-        openLink.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        openLink.addActionListener((event) -> this.openClickableActionWeb());
         toolBar.add(openLink);
         JButton delete = createJButton("delete.png", "Delete Selected Item");
         delete.addActionListener((event) -> this.deleteButtonClicked(event));
@@ -597,7 +592,7 @@ public class uiMain extends JFrame {
         JMenuItem price = createJMenutItem("Price", "checkmark.png", "Check Prices");
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         JMenuItem view = createJMenutItem("View", "webbrowser.png", "View Item in Browser");
-        view.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        view.addActionListener((event) -> this.openClickableActionWeb());
         JMenuItem edit = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         edit.addActionListener((event) -> this.editButtonClicked(event));
         JMenuItem remove = createJMenutItem("Remove", "delete.png", "Delete Selected Item");
@@ -703,7 +698,7 @@ public class uiMain extends JFrame {
         JMenuItem priceNested = createJMenutItem("Price", "checkmark.png", "Check Prices");
         priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
         JMenuItem viewNested = createJMenutItem("View", "webbrowser.png", "View Item on Browser");
-        viewNested.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
+        viewNested.addActionListener((event) -> this.openClickableActionWeb());
         JMenuItem editNested = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         editNested.addActionListener((event) -> this.editButtonClicked(event));
         JMenuItem removeNested = createJMenutItem("Remove", "delete.png", "Delete selected Item");

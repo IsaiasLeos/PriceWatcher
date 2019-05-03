@@ -22,13 +22,6 @@ public class ProductManager {
     }
 
     /**
-     * TODO
-     */
-    public void create() {
-
-    }
-
-    /**
      * Deletes a {@link model.Product} from the Product List
      *
      * @param product
@@ -43,6 +36,17 @@ public class ProductManager {
      */
     public List<Product> get() {
         return this.arrOfProducts;
+    }
+
+    public void create(String name, String date, int currentPrice, int startingPrice, String URL, int change) {
+        Product generated = new Product();
+        generated.setName(name);
+        generated.setDate(date);
+        generated.setStartingPrice(startingPrice);
+        generated.setCurrentPrice(currentPrice);
+        generated.setURL(URL);
+        generated.setChange(change);
+        add(generated);
     }
 
     /**
