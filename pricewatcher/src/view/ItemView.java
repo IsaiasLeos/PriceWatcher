@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.net.URL;
@@ -34,10 +33,9 @@ public class ItemView extends JPanel {
      * Create a new instance.
      *
      */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
     public ItemView() {
-        setBackground(Color.WHITE);
         setPreferredSize(dim);
+        product = new Product();
     }
 
     /**
@@ -51,23 +49,23 @@ public class ItemView extends JPanel {
         Color change = f == 0.0 ? Color.BLACK : f > 0.0 ? Color.GREEN : Color.RED;
         g.setFont(new Font("Arial", Font.PLAIN, 12));
         int x = 20, y = 10;
-        g.drawImage(product.getProductIcon(), x, y, this);
+        g.drawImage(product.getIcon(), x, y, this);
         y += 24 + 20;
-        g.drawString(textAttrManipulation("Name:     ", product.getProductName(), Font.BOLD, Color.BLACK), x, y);
+        g.drawString(textAttrManipulation("Name:     ", product.getName(), Font.BOLD, Color.BLACK), x, y);
         y += 20;
-        g.drawString(textAttrManipulation("URL:        " + product.getProductURL(), " ", Font.PLAIN, Color.BLACK), x, y);
+        g.drawString(textAttrManipulation("URL:        " + product.getURL(), " ", Font.PLAIN, Color.BLACK), x, y);
         y += 20;
-        g.drawString(textAttrManipulation("Price:       ", product.getProductPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
+        g.drawString(textAttrManipulation("Price:       ", product.getCurrentPrice() + "$", Font.PLAIN, Color.BLUE), x, y);//Green or Red
         y += 20;
-        if (product.getSound() == 1) {
+        if (product.getSound()) {
             if (f > 0.0) {
                 priceDecreased("play.wav");
             }
-            product.setSound(0);
+            product.setSound(false);
         }
         g.drawString(textAttrManipulation("Change:  ", Math.abs(product.getChange()) + "%", Font.PLAIN, change), x, y);//Green or Red
         y += 20;
-        g.drawString(textAttrManipulation("Added:     " + product.getAddedDate() + " (" + product.getInitialPrice() + "$)", " ", Font.PLAIN, Color.BLACK), x, y);
+        g.drawString(textAttrManipulation("Added:     " + product.getDate() + " (" + product.getStartingPrice() + "$)", " ", Font.PLAIN, Color.BLACK), x, y);
         g.dispose();
     }
 
@@ -117,14 +115,6 @@ public class ItemView extends JPanel {
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Product getProduct() {
-        return product;
     }
 
     /**

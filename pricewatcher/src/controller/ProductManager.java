@@ -6,10 +6,10 @@ import model.Product;
 
 public class ProductManager {
 
-    private List<Product> products;
+    private List<Product> arrOfProducts;
 
     public ProductManager() {
-        this.products = new ArrayList<>();
+        this.arrOfProducts = new ArrayList<>();
     }
 
     /**
@@ -18,7 +18,14 @@ public class ProductManager {
      * @param product
      */
     public void add(Product product) {
-        this.getProducts().add(product);
+        this.get().add(product);
+    }
+
+    /**
+     * TODO
+     */
+    public void create() {
+
     }
 
     /**
@@ -26,33 +33,25 @@ public class ProductManager {
      *
      * @param product
      */
-    public void delete(Product product) {
-        this.getProducts().remove(product);
+    public void delete(int product) {
+        this.get().remove(product);
     }
 
     /**
      *
      * @return the list of products
      */
-    public List<Product> getList() {
-        return this.getProducts();
-    }
-
-    /**
-     *
-     * @return the the list of products
-     */
-    public List<Product> getProducts() {
-        return this.products;
+    public List<Product> get() {
+        return this.arrOfProducts;
     }
 
     /**
      * Sets the current product list to the given one from the parameter.
      *
-     * @param products
+     * @param arrOfProducts
      */
-    public void setItems(List<Product> products) {
-        this.products = products;
+    public void set(List<Product> arrOfProducts) {
+        this.arrOfProducts = arrOfProducts;
     }
 
 }

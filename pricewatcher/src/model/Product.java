@@ -1,10 +1,10 @@
 package model;
 
 import java.awt.Image;
+import java.net.URL;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URL;
 import javax.imageio.ImageIO;
 
 /**
@@ -15,51 +15,61 @@ import javax.imageio.ImageIO;
  */
 public class Product {
 
-    private String productURL;
-    private String productName;
-    private String addedDate;
-    private double productPrice;
+    private String url;
+    private String name;
+    private String date;
+    private double currentPrice;
     private double change;
-    private double initialPrice;
+    private double startingPrice;
     private Image productIcon;
-    private int sound = -1;
+    private boolean sound;
 
     /**
-     * Alternative constructor for the product with given information.
      *
-     * @param productName name of product
-     * @param currentURL current URL of the product
-     * @param initialPrice price when first added
-     * @param addedDate date product was added
-     */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Product(String currentURL, String productName, double initialPrice, String addedDate) {
-        this.productURL = currentURL;
-        this.productName = productName;
-        this.initialPrice = initialPrice;
-        this.productPrice = initialPrice;
-        this.addedDate = addedDate;
-        this.productIcon = getProductIcon("webbrowser.png");
-        if (this.productURL.contains("amazon")) {
-            urlCheck();
-        }
-    }
-
-    /**
-     * Default constructor for the product.
      */
     public Product() {
     }
 
     /**
+     * Alternative constructor for the product with given information.
+     *
+     * @param name name of product
+     * @param url current URL of the product
+     * @param date date product was added
+     */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
+    public Product(String url, String name, String date) {
+        this.url = url;
+        this.name = name;
+        this.currentPrice = startingPrice;
+        this.date = date;
+        this.productIcon = getImage("webbrowser.png");
+        if (this.url.contains("amazon")) {
+            urlSanitize();
+        }
+    }
+
+    public Product(String url, String name, double startingPrice, String date) {
+        this.url = url;
+        this.name = name;
+        this.startingPrice = startingPrice;
+        this.currentPrice = this.startingPrice;
+        this.date = date;
+        this.productIcon = getImage("webbrowser.png");
+        if (this.url.contains("amazon")) {
+            urlSanitize();
+        }
+    }
+
+    /**
      * Sets the price to a new calculated price and updates the change.
      *
-     * @param newPrice
+     * @param price
      */
-    public void checkPrice(double newPrice) {
-        setProductPrice(newPrice);
-        setChange(new BigDecimal(calculateProductChange(getInitialPrice(), getProductPrice())).setScale(2, RoundingMode.CEILING).doubleValue());
-        sound = 1;
+    public void checkPrice(double price) {
+        setCurrentPrice(price);
+        setChange(new BigDecimal(calcChange(getStartingPrice(), getCurrentPrice())).setScale(2, RoundingMode.CEILING).doubleValue());
+        sound = true;
     }
 
     /**
@@ -69,7 +79,7 @@ public class Product {
      * @param newPrice the current price of the product
      * @return the difference shown as a percentage
      */
-    private double calculateProductChange(double newPrice, double initialPrice) {
+    private double calcChange(double newPrice, double initialPrice) {
         return ((newPrice - initialPrice) / initialPrice) * 100;
     }
 
@@ -77,87 +87,86 @@ public class Product {
      *
      * @return
      */
-    public int getSound() {
+    public boolean getSound() {
         return sound;
     }
 
     /**
      *
-     * @param sound
+     * @param playSound
      */
-    public void setSound(int sound) {
-        this.sound = sound;
+    public void setSound(boolean playSound) {
+        this.sound = playSound;
     }
 
     /**
      *
      * @return returns the current URL of the item being watched.
      */
-    public String getProductURL() {
-        return productURL;
+    public String getURL() {
+        return url;
     }
 
     /**
      * Replaces the current URL of the item being watched.
      *
-     * @param productURL the name of the URL that will be replacing the current
-     * item name.
+     * @param url the name of the URL that will be replacing the current item
+     * name.
      */
-    public void setCurrentURL(String productURL) {
-        this.productURL = productURL;
+    public void setURL(String url) {
+        this.url = url;
     }
 
     /**
      *
      * @return returns the name of the current item.
      */
-    public String getProductName() {
-        return productName;
+    public String getName() {
+        return name;
     }
 
     /**
      * Replaces the current Name of the item being watched.
      *
-     * @param productName the name of the item that will be replacing the
-     * current item.
+     * @param name the name of the item that will be replacing the current item.
      */
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
      *
      * @return returns the price of the current item.
      */
-    public double getProductPrice() {
-        return productPrice;
+    public double getCurrentPrice() {
+        return currentPrice;
     }
 
     /**
      * Replaces the current Price of the item being watched.
      *
-     * @param productPrice the price that will be replacing the current price of
-     * the item.
+     * @param price the price that will be replacing the current price of the
+     * item.
      */
-    public void setProductPrice(double productPrice) {
-        this.productPrice = productPrice;
+    public void setCurrentPrice(double price) {
+        this.currentPrice = price;
     }
 
     /**
      *
      * @return the current date of when the product was added
      */
-    public String getAddedDate() {
-        return addedDate;
+    public String getDate() {
+        return date;
     }
 
     /**
      * Sets the date of when a product was added.
      *
-     * @param addedDate
+     * @param date
      */
-    public void setAddedDate(String addedDate) {
-        this.addedDate = addedDate;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     /**
@@ -182,28 +191,36 @@ public class Product {
      *
      * @return
      */
-    public double getInitialPrice() {
-        return initialPrice;
+    public double getStartingPrice() {
+        return startingPrice;
     }
 
     /**
      * Sets the initial price of an item, if wrong.
      *
-     * @param initialPrice
+     * @param price
      */
-    public void setInitialPrice(double initialPrice) {
-        this.initialPrice = initialPrice;
+    public void setStartingPrice(double price) {
+        this.startingPrice = price;
     }
 
-    public Image getProductIcon() {
+    /**
+     *
+     * @return
+     */
+    public Image getIcon() {
         if (productIcon == null) {
-            this.productIcon = getProductIcon("webbrowser.png");
+            this.productIcon = getImage("webbrowser.png");
         }
         return productIcon;
     }
 
-    public void setProductIcon(String productIcon) {
-        this.productIcon = getProductIcon(productIcon);
+    /**
+     *
+     * @param icon
+     */
+    public void setIcon(String icon) {
+        this.productIcon = getImage(icon);
     }
 
     /**
@@ -213,7 +230,7 @@ public class Product {
      * @return
      */
     @SuppressWarnings("CallToPrintStackTrace")
-    public Image getProductIcon(String file) {
+    public Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource("/resources/"), file);
             return ImageIO.read(url);
@@ -223,8 +240,8 @@ public class Product {
         return null;
     }
 
-    private void urlCheck() {
-        String[] sanitize = productURL.split("/");
+    private void urlSanitize() {
+        String[] sanitize = url.split("/");
         String newUrl = "";
         for (int i = 0; i < sanitize.length; i++) {
             if (sanitize[i].contains("ref") && !sanitize[i].contains("?ref")) {
@@ -239,7 +256,7 @@ public class Product {
             }
             newUrl += sanitize[i] + "/";
         }
-        setCurrentURL(newUrl);
+        setURL(newUrl);
     }
 
 }

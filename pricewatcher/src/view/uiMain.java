@@ -1,29 +1,33 @@
 package view;
 
 import controller.PriceFinder;
-import storage.StorageManager;
+import controller.ProductManager;
 import model.Product;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -35,13 +39,11 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UnsupportedLookAndFeelException;
-import utils.Sorting;
 
 /**
  * A dialog for tracking the price of an item.
@@ -49,17 +51,20 @@ import utils.Sorting;
  * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
-public class Main extends uiMain {
+public class uiMain extends JFrame {
 
-    private StorageManager storageManager;
-    private Sorting sortAlgorithm;
-    private Dimension itemViewDim;
-    private JProgressBar download = new JProgressBar();
+    protected JLabel msgBar = new JLabel("");
+    protected JList viewListCell;
+    protected JPopupMenu popupMenu;
+    protected DefaultListModel<Product> defaultListModel;
+    protected Renderer renderer;
+    protected ProductManager originalProductManager;
+    protected PriceFinder webPrice;
 
     /**
      * Create a Dialog of Default Size (600,400).
      */
-    public Main() {
+    public uiMain() {
         this(new Dimension(600, 400));
     }
 
@@ -69,30 +74,32 @@ public class Main extends uiMain {
      * @param dim
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Main(Dimension dim) {
-        createUI();
+    public uiMain(Dimension dim) {
+        super("Price Watcher");
+        createDefaultProduct();
+        setLayout(new BorderLayout());
         setSize(dim);
+        createUI();
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
         setResizable(true);
         showMessage("Welcome!", 4);
         pack();
-        setVisible(true);
     }
 
     /**
      * Create and Configure the GUI.
      *
      */
-    @Override
     protected void createUI() {
-        JPopupMenu jPopMenu = createJPopupMenu();
+        JPanel controlPanel = createControlPanel();
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 16, 0, 16));
+        add(controlPanel, BorderLayout.CENTER);
         JPanel drawingBoard = new JPanel();
-        sortAlgorithm = new Sorting();
-        storageManager = new StorageManager();
-        defaultListModel = createListModel(storageManager);
         viewListCell = createJList(defaultListModel);
-        viewListCell.addMouseListener(mouseListener(jPopMenu));
+        viewListCell.addMouseListener(mouseListener());
         viewListCell.addMouseMotionListener(mouseMotionListener());
         viewListCell.setVisibleRowCount(3);
         drawingBoard.add(new JScrollPane(viewListCell));
@@ -100,33 +107,53 @@ public class Main extends uiMain {
                 BorderFactory.createEmptyBorder(10, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.WHITE)));
         drawingBoard.setLayout(new GridLayout(1, 1));
-        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
-        setJMenuBar(createJMenuBar());
-        add(createJToolBar("ToolBar"), BorderLayout.NORTH);
         add(drawingBoard, BorderLayout.CENTER);
-        add(msgBar, BorderLayout.AFTER_LAST_LINE);
+        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
+        add(msgBar, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Create a control panel consisting of a Tool Bar, Menu Bar, and a Pop-up
+     * Menu.
+     */
+    protected JPanel createControlPanel() {
+        createJPopupMenu();
+        createJMenuBar();
+        add(createJToolBar("Toolbar"), BorderLayout.NORTH);
+        return new JPanel();
     }
 
     /**
      * Show briefly the given string in the message bar.
+     *
+     * @param msg
+     * @param time
      */
-    @Override
     protected void showMessage(String msg, int time) {
-        super.showMessage(msg, time);
+        msgBar.setText(msg);
+        new Thread(() -> {
+            try {
+                Thread.sleep(4 * 1000);
+            } catch (InterruptedException e) {
+            }
+            if (msg.equals(msgBar.getText())) {
+                SwingUtilities.invokeLater(() -> msgBar.setText(" "));
+            }
+        }).start();
     }
 
     /**
      * Listen to when the mouse is either right clicking or left clicking on the
      * JList.
      *
-     * @param mouseEvent
+     * @return
      */
-    private MouseAdapter mouseListener(JPopupMenu jPopMenu) {
+    protected MouseAdapter mouseListener() {
         return new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    jPopMenu.show(viewListCell, mouseEvent.getX(), mouseEvent.getY());
+                    popupMenu.show(viewListCell, mouseEvent.getX(), mouseEvent.getY());
                 }
                 if (mouseEvent.getClickCount() == 1) {
                     for (int i = 0; i < defaultListModel.getSize(); i++) {
@@ -148,71 +175,75 @@ public class Main extends uiMain {
      *
      * @return
      */
-    @Override
     protected MouseMotionListener mouseMotionListener() {
-        return super.mouseMotionListener();
-    }
-
-    /**
-     *
-     * @param product
-     */
-    private void setPrice(Product product) {
-        PriceFinder webPrice = new PriceFinder();
-        new Thread(() -> {
-            Double price = webPrice.getPrice(product.getURL());
-            if (price == -1) {
-                JLabel label = new JLabel(""
-                        + "<html>"
-                        + "<center>"
-                        + "Error downloading information!<br>The following is invalid link or has no current price available.<br>Want to open it in your browser?"
-                        + "</center>"
-                        + "</html>");
-                label.setHorizontalAlignment(SwingConstants.CENTER);
-                int option = JOptionPane.showConfirmDialog(this, label, "Error", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "network.png")));
-                if (option == 0) {
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        try {
-                            Desktop.getDesktop().browse(new URI(product.getURL()));
-                        } catch (URISyntaxException | IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } else {
-                if (product.getStartingPrice() == 0) {
-                    product.setStartingPrice(price);
-                    product.setCurrentPrice(price);
-                } else {
-                    product.checkPrice(price);
-                }
-                storageManager.toStorage(storageManager.toJSON());
-                repaint();
+        return new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
             }
-        }).start();
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (e.getX() < 40
+                        && e.getX() > 22
+                        && e.getY() < 32 + (viewListCell.getSelectedIndex() * 160)
+                        && e.getY() > 12 + (viewListCell.getSelectedIndex() * 160)
+                        && viewListCell.getSelectedIndex() != -1) {
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("ebay")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("ebay.png");
+                    }
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("amazon")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("amazon.png");
+                    }
+                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("walmart")) {
+                        defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("walmart.png");
+                    }
+                    repaint();
+                } else if (viewListCell.getSelectedIndex() > -1) {
+                    defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("webbrowser.png");
+                    repaint();
+                }
+            }
+        };
+
     }
 
     /**
-     * Gets the current date.
+     * Create a {@link model.Product} given the parameters.
      *
-     * @return current date in MM/dd/yyyy format
+     * @param itemURL the URL that links to the item
+     * @param itemName the name of the product
+     * @param itemPrice the initial price of the item
+     * @param itemDateAdded the date of when the product was added
+     * @return
+     */
+    protected Product createProduct(String itemURL, String itemName, double itemPrice, String itemDateAdded) {
+        return new Product(itemURL, itemName, itemPrice, itemDateAdded);
+    }
+
+    /**
      *
      */
-    @Override
-    protected String getCurrentDate() {
-        return super.getCurrentDate();
+    @SuppressWarnings("unchecked")
+    protected void createDefaultProduct() {
+        originalProductManager = new ProductManager();
+        String productURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
+        String productName = "Nintendo Switch";
+        double productInitialPrice = 359.99;
+        String productDateAdded = "1/30/2019";
+        originalProductManager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        defaultListModel = createListModel(originalProductManager);
+        webPrice = new PriceFinder();
     }
 
     /**
      * Refreshes the list of products given within the {@link JList}
      *
+     * @param event
      */
-    @SuppressWarnings("deprecation")
-    @Override
     protected void refreshButtonClicked(ActionEvent event) {
-        if (defaultListModel.getSize() > -1) {
+        if (defaultListModel.getSize() != 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
-                setPrice(defaultListModel.get(i));
+                defaultListModel.get(i).checkPrice(webPrice.getPrice(defaultListModel.get(i).getCurrentPrice()));
             }
             repaint();
             showMessage("Refreshing...", 4);
@@ -225,45 +256,42 @@ public class Main extends uiMain {
     /**
      * Refreshes the selected index inside of the {@link JList}
      *
+     * @param event
      */
-    @Override
+    @SuppressWarnings("deprecation")
     protected void singleRefreshButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
-            setPrice(defaultListModel.get(viewListCell.getSelectedIndex()));
+            defaultListModel.get(viewListCell.getSelectedIndex()).checkPrice(webPrice.getPrice(defaultListModel.get(viewListCell.getSelectedIndex()).getCurrentPrice()));
             repaint();
             showMessage("Refreshing...", 4);
         } else {
             showMessage("Not Selecting an Item", 4);
         }
+
     }
 
     /**
-     * Adds a {@link model.Product} to the current {@link JList}.There must be a
-     * given name, URL, and price of the product. Date will be given to whatever
-     * the given date is.
+     * Adds a {@link model.Product} to the current {@link JList}. There must be
+     * a given name, URL, and price of the product. Date will be given to
+     * whatever the given date is.
      *
+     * @param event
      */
-    @Override
     protected void addButtonClicked(ActionEvent event) {
         JTextField name = new JTextField();
         JTextField url = new JTextField();
-        JTextField price = new JTextField("0.0");
-        price.setEditable(false);
-        Object[] message = {"Product Name:", name, "Product URL:", url, "Product Price:", price};
-        int option = JOptionPane.showConfirmDialog(
-                this,
-                message,
-                "Add",
-                JOptionPane.OK_CANCEL_OPTION,
-                0,
-                new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                        + "plus.png")));
+        JTextField price = new JTextField();
+        Object[] message = {
+            "Product Name:", name,
+            "Product URL:", url,
+            "Product Price:", price
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+        //OK
         if (option == 0) {
             try {
-                Product generatedProduct = new Product(url.getText(), name.getText(), getCurrentDate());
-                setPrice(generatedProduct);
+                Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()), getCurrentDate());
                 defaultListModel.addElement(generatedProduct);
-                storageManager.add(generatedProduct);
                 showMessage("Product Successfully Added", 4);
             } catch (NumberFormatException e) {
                 showMessage("Please re-enter correct information.", 4);
@@ -271,28 +299,40 @@ public class Main extends uiMain {
                 showMessage("Please re-enter correct information.", 4);
             }
         }
-        repaint();
+        //Cancel 
+        if (option == 2) {
+
+        }
+        //Closed
+        if (option == -1) {
+
+        }
+    }
+
+    /**
+     * Gets the current date.
+     *
+     * @return current date in MM/dd/yyyy format
+     *
+     */
+    protected String getCurrentDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+        Date date = new Date(System.currentTimeMillis());
+        return formatter.format(date);
     }
 
     /**
      * Searches for the {@link model.Product} Name and displays product that
      * contain the same letters while ignoring capitalization.
      *
+     * @param event
      */
-    @Override
     protected void searchButtonClicked(ActionEvent event) {
         JTextField search = new JTextField();
         Object[] message = {
             "Search:", search
         };
-        int option = JOptionPane.showConfirmDialog(
-                this,
-                message,
-                "Add",
-                JOptionPane.OK_CANCEL_OPTION,
-                0,
-                new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                        + "plus.png")));
+        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
         if (option == 0) {
             for (int i = 0; i < defaultListModel.getSize(); i++) {
                 if (defaultListModel.get(i).getName().toLowerCase().contains(search.getText().toLowerCase())) {
@@ -305,83 +345,79 @@ public class Main extends uiMain {
 
     /**
      * Moves to the top of cell within the {@link JList}.
+     *
+     * @param event
      */
-    @Override
     protected void moveUpButtonClicked(ActionEvent event) {
-        super.moveUpButtonClicked(event);
+        if (defaultListModel.getSize() > -1) {
+            viewListCell.setSelectedIndex(0);
+        }
     }
 
     /**
      * Moves to the last of the cell within the {@link JList}.
      *
+     * @param event
      */
-    @Override
     protected void moveDownButtonClicked(ActionEvent event) {
-        super.moveDownButtonClicked(event);
+        if (defaultListModel.getSize() > -1) {
+            viewListCell.setSelectedIndex(defaultListModel.getSize() - 1);
+
+        }
     }
 
     /**
      * Deletes the currently selected cell within the {@link JList}.
+     *
+     * @param event
      */
-    @Override
     protected void deleteButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
-            int selected = JOptionPane.showConfirmDialog(
-                    this,
-                    "Do you want to delete this item?",
-                    "Delete",
-                    JOptionPane.YES_NO_OPTION,
-                    0,
-                    new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                            + "delete.png")));
-            if (selected == 0) {
-                storageManager.delete(viewListCell.getSelectedIndex());
-                defaultListModel.remove(viewListCell.getSelectedIndex());
-                storageManager.toStorage(storageManager.toJSON());
-                repaint();
-            }
+            defaultListModel.remove(viewListCell.getSelectedIndex());
+            repaint();
         } else {
             showMessage("Not Selecting an Item", 4);
         }
     }
 
     /**
-     * Edits the currently selected cell within the {@link JList}.While editing,
-     * the current information of the selected cell's product will be displayed
-     * within the {@link JOptionPane} given.
+     * Edits the currently selected cell within the {@link JList}. While
+     * editing, the current information of the selected cell's product will be
+     * displayed within the {@link JOptionPane} given.
      *
+     * @param event
      */
-    @Override
     protected void editButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
             Product generatedProduct = defaultListModel.get(viewListCell.getSelectedIndex());
             JTextField name = new JTextField(generatedProduct.getName());
             JTextField url = new JTextField(generatedProduct.getURL(), 5);
             JTextField price = new JTextField("" + (generatedProduct.getCurrentPrice()));
-            price.setEditable(false);
             Object[] message = {
                 "Product Name:", name,
                 "Product URL:", url,
                 "Product Price:", price
             };
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    message,
-                    "Edit",
-                    JOptionPane.PLAIN_MESSAGE,
-                    0,
-                    new ImageIcon(getClass().getClassLoader().getResource("resources/"
-                            + "edit.png")));
+            int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
             if (option == 0) {
                 try {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setName(name.getText());
                     defaultListModel.get(viewListCell.getSelectedIndex()).setURL(url.getText());
-                    setPrice(defaultListModel.get(viewListCell.getSelectedIndex()));
+                    defaultListModel.get(viewListCell.getSelectedIndex()).setStartingPrice(Double.parseDouble(price.getText()));
+                    defaultListModel.get(viewListCell.getSelectedIndex()).setCurrentPrice(Double.parseDouble(price.getText()));
                     repaint();
                     showMessage("Succesfully Edited a Product", 4);
                 } catch (NumberFormatException e) {
                     showMessage("Please re-enter correct information.", 4);
                 }
+            }
+            //Close Button
+            if (option == -1) {
+
+            }
+            //Cancel
+            if (option == 2) {
+
             }
         } else {
             showMessage("Not Selecting an Item", 4);
@@ -394,27 +430,103 @@ public class Main extends uiMain {
      *
      * @param selectedIndex
      */
-    @Override
     protected void openClickableActionWeb(int selectedIndex) {
-        super.openClickableActionWeb(selectedIndex);
+        if (selectedIndex > -1) {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    Desktop.getDesktop().browse(new URI(defaultListModel.get(selectedIndex).getURL()));
+                } catch (URISyntaxException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            showMessage("Opening Webpage", 4);
+        } else {
+            showMessage("Not Selecting an Item", 4);
+        }
     }
 
     /**
      * Shows a {@link JLabel} with the information of who worked on this project
      * and a link to the source code.
      *
+     * @param event
      */
-    @Override
     protected void aboutButtonClicked(ActionEvent event) {
-        super.aboutButtonClicked(event);
+        JLabel label = new JLabel("<html>"
+                + "<center>"
+                + "<strong>PriceWatcher v3.6</strong>"
+                + "<br>Creators:<br><br><i><sup>Isaias Leos<br>Leslie Gomez</sup>"
+                + "</i><br><strong><a href=\"https://github.com/IsaiasLeos/PriceWatcher\">Github</a><strong></center></html>");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI("https://github.com/IsaiasLeos/PriceWatcher"));
+                } catch (URISyntaxException | IOException error) {
+                    error.printStackTrace();
+                }
+            }
+        });
+        JOptionPane.showMessageDialog(null, label, "About", JOptionPane.PLAIN_MESSAGE);
     }
 
     /**
      * Exits the program.
      *
+     * @param event
      */
-    protected void exitButtonClicked() {
+    protected void exitButtonClicked(ActionEvent event) {
         dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortOld(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortNew(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortNameAscending(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortNameDescending(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortHigh(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortLow(ActionEvent event) {
+    }
+
+    /**
+     *
+     * @param event
+     */
+    protected void sortChange(ActionEvent event) {
     }
 
     /**
@@ -432,7 +544,6 @@ public class Main extends uiMain {
      * @param title
      * @return JToolBar
      */
-    @Override
     protected JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
         JButton checkmark = createJButton("checkmark.png", "Check Item Prices");
@@ -481,134 +592,73 @@ public class Main extends uiMain {
      *
      * @return a pop-up menu of items
      */
-    private JPopupMenu createJPopupMenu() {
+    private void createJPopupMenu() {
         JPopupMenu generatedPopupMenu = new JPopupMenu();
         JMenuItem price = createJMenutItem("Price", "checkmark.png", "Check Prices");
         price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        generatedPopupMenu.add(price);
         JMenuItem view = createJMenutItem("View", "webbrowser.png", "View Item in Browser");
         view.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
-        generatedPopupMenu.add(view);
         JMenuItem edit = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         edit.addActionListener((event) -> this.editButtonClicked(event));
-        generatedPopupMenu.add(edit);
         JMenuItem remove = createJMenutItem("Remove", "delete.png", "Delete Selected Item");
         remove.addActionListener((event) -> this.deleteButtonClicked(event));
-        generatedPopupMenu.add(remove);
-        generatedPopupMenu.addSeparator();
-        JMenu generatedNestedMenu = new JMenu("Filter");
-        JMenuItem amazonMenu = createJMenutItem("Amazon", "amazon.png", "Filter by Amazon Links");
-        amazonMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("amazon"));
-        generatedNestedMenu.add(amazonMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
-        JMenuItem ebayMenu = createJMenutItem("eBay", "ebay.png", "Filter by eBay Links");
-        ebayMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("ebay"));
-        generatedNestedMenu.add(ebayMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
-        JMenuItem walmartMenu = createJMenutItem("Walmart", "walmart.png", "Filter by Walmart Links");
-        walmartMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("walmart"));
-        generatedNestedMenu.add(walmartMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
-        generatedPopupMenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.toClipboard(1));
-        generatedPopupMenu.add(cname);
         JMenuItem curl = new JMenuItem("Copy URL");
         curl.addActionListener((event) -> this.toClipboard(2));
-        generatedPopupMenu.add(curl);
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.toClipboard(3));
+        generatedPopupMenu.add(price);
+        generatedPopupMenu.add(view);
+        generatedPopupMenu.add(edit);
+        generatedPopupMenu.add(remove);
+        generatedPopupMenu.addSeparator();
+        generatedPopupMenu.add(cname);
+        generatedPopupMenu.add(curl);
         generatedPopupMenu.add(citem);
-        return generatedPopupMenu;
+        popupMenu = generatedPopupMenu;
     }
 
     /**
      * Creates a {@link DefaultListModel} of the {@link ProductManager}.
      *
-     * @param storageManager
+     * @param originalProductManager
      * @return
      */
-    private DefaultListModel createListModel(StorageManager storageManager) {
+    protected DefaultListModel createListModel(ProductManager originalProductManager) {
         DefaultListModel generatedListModel = new DefaultListModel<>();
-        try {
-            storageManager.fromJSON();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        storageManager.get().forEach((element) -> generatedListModel.addElement(element));
+        originalProductManager.get().forEach(generatedListModel::addElement);
         return generatedListModel;
     }
 
     /**
      * Creates a {@link JList} from a {@link DefaultListModel}.
      *
-     * @param defaultListModel
      * @return
      */
-    @Override
     protected JList createJList(DefaultListModel defaultListModel) {
         JList generatedJList = new JList<>(defaultListModel);
-        Renderer renderView = new Renderer();
-        itemViewDim = renderView.dim;
-        generatedJList.setCellRenderer(renderView);
+        renderer = new Renderer();
+        generatedJList.setCellRenderer(renderer);
         return generatedJList;
-    }
-
-    /**
-     * Switches the theme of the applications.
-     *
-     * @param theme
-     */
-    private void switchThemes(String theme) {
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if (theme.equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-            System.err.println("Failed to apply themes" + e);
-        }
-        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
      * Creates a {@link JMenuBar} that contains the creator information, actions
      * for {@link model.Product} and sorting for the JList.
-     *
-     * @return
      */
-    private JMenuBar createJMenuBar() {
+    private void createJMenuBar() {
         JMenuBar fileMenuBar = new JMenuBar();
-
-        JMenu themeMenu = new JMenu("Themes");
-        JMenuItem themeWindows = new JMenuItem("Windows");
-        themeWindows.addActionListener((event) -> this.switchThemes("Windows"));
-        themeMenu.add(themeWindows);
-        JMenuItem themeWindowsClassic = new JMenuItem("Windows Classic");
-        themeWindowsClassic.addActionListener((event) -> this.switchThemes("Windows Classic"));
-        themeMenu.add(themeWindowsClassic);
-        JMenuItem themeWindowsMetal = new JMenuItem("Metal");
-        themeWindowsMetal.addActionListener((event) -> this.switchThemes("Metal"));
-        themeMenu.add(themeWindowsMetal);
-        JMenuItem themeWindowsNimbus = new JMenuItem("Nimbus");
-        themeWindowsNimbus.addActionListener((event) -> this.switchThemes("Nimbus"));
-        themeMenu.add(themeWindowsNimbus);
-        JMenuItem themeWindowsCDEMotif = new JMenuItem("CDE/Motif");
-        themeWindowsCDEMotif.addActionListener((event) -> this.switchThemes("CDE/Motif"));
-        themeMenu.add(themeWindowsCDEMotif);
-
         JMenu appMenu = new JMenu("App");
+        JMenu editMenu = new JMenu("Item");
+        JMenu sortMenu = new JMenu("Sort");
         JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
         about.addActionListener((event) -> this.aboutButtonClicked(event));
         appMenu.add(about);
         JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
-        exit.addActionListener((event) -> this.exitButtonClicked());
+        exit.addActionListener((event) -> this.exitButtonClicked(event));
         exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
         appMenu.add(exit);
-
-        JMenu editMenu = new JMenu("Item");
         JMenuItem check = createJMenuItem("Check Prices", "Check Item Prices", "checkmark.png", KeyEvent.VK_C, ActionEvent.ALT_MASK);
         check.addActionListener((event) -> this.refreshButtonClicked(event));
         editMenu.add(check);
@@ -627,88 +677,94 @@ public class Main extends uiMain {
         backward.addActionListener((event) -> this.moveDownButtonClicked(event));
         backward.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "down.png")));
         editMenu.add(backward);
-
-        JMenu sortMenu = new JMenu("Sort");
-        ButtonGroup buttonGroup = new ButtonGroup();
         JMenuItem oldest = new JRadioButtonMenuItem("Oldest");
-        oldest.addActionListener((event) -> this.sortAlgorithm.sortOld(storageManager, defaultListModel));
-        buttonGroup.add(oldest);
+        oldest.addActionListener((event) -> this.sortOld(event));
         sortMenu.add(oldest);
         JMenuItem newest = new JRadioButtonMenuItem("Newest");
-        newest.addActionListener((event) -> this.sortAlgorithm.sortNew(storageManager, defaultListModel));
-        buttonGroup.add(newest);
+        newest.addActionListener((event) -> this.sortNew(event));
         sortMenu.add(newest);
         sortMenu.addSeparator();
         JMenuItem ascend = new JRadioButtonMenuItem("Ascending Order");
-        ascend.addActionListener((event) -> this.sortAlgorithm.sortNameAscending(storageManager, defaultListModel));
-        buttonGroup.add(ascend);
+        ascend.addActionListener((event) -> this.sortNameAscending(event));
         sortMenu.add(ascend);
         JMenuItem descend = new JRadioButtonMenuItem("Descending Order");
-        descend.addActionListener((event) -> this.sortAlgorithm.sortNameDescending(storageManager, defaultListModel));
-        buttonGroup.add(descend);
+        descend.addActionListener((event) -> this.sortNameDescending(event));
         sortMenu.add(descend);
         sortMenu.addSeparator();
         JMenuItem low = new JRadioButtonMenuItem("Lowest Price ($)");
-        low.addActionListener((event) -> this.sortAlgorithm.sortLow(storageManager, defaultListModel));
-        buttonGroup.add(low);
+        low.addActionListener((event) -> this.sortLow(event));
         sortMenu.add(low);
         JMenuItem high = new JRadioButtonMenuItem("Highest Price ($)");
-        high.addActionListener((event) -> this.sortAlgorithm.sortHigh(storageManager, defaultListModel));
-        buttonGroup.add(high);
+        high.addActionListener((event) -> this.sortHigh(event));
         sortMenu.add(high);
-        JMenuItem priceChangeHigh = new JRadioButtonMenuItem("High Price Change (%)");
-        priceChangeHigh.addActionListener((event) -> this.sortAlgorithm.sortChangeHigh(storageManager, defaultListModel));
-        buttonGroup.add(priceChangeHigh);
-        sortMenu.add(priceChangeHigh);
-        JMenuItem priceChangeLow = new JRadioButtonMenuItem("Low Price Change (%)");
-        priceChangeLow.addActionListener((event) -> this.sortAlgorithm.sortChangeLow(storageManager, defaultListModel));
-        buttonGroup.add(priceChangeLow);
-        sortMenu.add(priceChangeLow);
-
+        JMenuItem priceChange = new JRadioButtonMenuItem("Price Change (%)");
+        priceChange.addActionListener((event) -> this.sortChange(event));
         JMenu generatedNestedMenu = new JMenu("Selected");
         JMenuItem priceNested = createJMenutItem("Price", "checkmark.png", "Check Prices");
         priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        generatedNestedMenu.add(priceNested);
         JMenuItem viewNested = createJMenutItem("View", "webbrowser.png", "View Item on Browser");
         viewNested.addActionListener((event) -> this.openClickableActionWeb(viewListCell.getSelectedIndex()));
-        generatedNestedMenu.add(viewNested);
         JMenuItem editNested = createJMenutItem("Edit", "edit.png", "Edit selected Item");
         editNested.addActionListener((event) -> this.editButtonClicked(event));
-        generatedNestedMenu.add(editNested);
         JMenuItem removeNested = createJMenutItem("Remove", "delete.png", "Delete selected Item");
         removeNested.addActionListener((event) -> this.deleteButtonClicked(event));
-        generatedNestedMenu.add(removeNested);
-        generatedNestedMenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.toClipboard(1));
-        generatedNestedMenu.add(cname);
         JMenuItem curl = new JMenuItem("Copy URL");
         curl.addActionListener((event) -> this.toClipboard(2));
-        generatedNestedMenu.add(curl);
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.toClipboard(3));
+        generatedNestedMenu.add(priceNested);
+        generatedNestedMenu.add(viewNested);
+        generatedNestedMenu.add(editNested);
+        generatedNestedMenu.add(removeNested);
+        generatedNestedMenu.addSeparator();
+        generatedNestedMenu.add(cname);
+        generatedNestedMenu.add(curl);
         generatedNestedMenu.add(citem);
         editMenu.add(generatedNestedMenu);
-
+        sortMenu.add(priceChange);
         fileMenuBar.add(appMenu);
         fileMenuBar.add(editMenu);
         fileMenuBar.add(sortMenu);
-        fileMenuBar.add(themeMenu);
-        return fileMenuBar;
+        setJMenuBar(fileMenuBar);
     }
 
     /**
      * Copies information inside of the {@link Jlist} to the System Clipboard.
-     * Option 1 will obtain the name and put the information into the Clipboard.
-     * Option 2 will obtain the URLand put the information into the Clipboard.
-     * Option 3 will obtain the whole product information and put the
-     * information into the Clipboard..
      *
-     * @param option product information.
+     * @param option name will given name of product, product url, and whole
+     * product information.
      */
-    @Override
     protected void toClipboard(int option) {
-        super.toClipboard(option);
+        if (viewListCell.getSelectedIndex() > -1) {
+            StringSelection selection = new StringSelection("");
+            Clipboard clipboard;
+            switch (option) {
+                case 1:
+                    selection = new StringSelection(defaultListModel.get(viewListCell.getSelectedIndex()).getName());
+                    break;
+                case 2:
+                    selection = new StringSelection(defaultListModel.get(viewListCell.getSelectedIndex()).getURL());
+                    break;
+                case 3:
+                    Product toClipboard = defaultListModel.get(viewListCell.getSelectedIndex());
+                    selection = new StringSelection(
+                            "Name:  " + toClipboard.getName() + "\n"
+                            + "URL:  " + toClipboard.getURL() + "\n"
+                            + "Price:  " + toClipboard.getCurrentPrice() + "\n"
+                            + "Change:  " + toClipboard.getChange() + "\n"
+                            + "Date Added:  " + toClipboard.getDate() + "\n"
+                    );
+                    break;
+                default:
+                    break;
+            }
+            clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(selection, selection);
+        } else {
+            showMessage("Not Selecting an Item", 4);
+        }
     }
 
     /**
@@ -716,46 +772,56 @@ public class Main extends uiMain {
      * or ALT is being pressed.
      *
      * @param label name of the item
-     * @param tooltip
-     * @param itemName
      * @param key {@link KeyEvent}
      * @param mask modifier
      * @return
      */
-    @Override
     protected JMenuItem createJMenuItem(String label, String tooltip, String itemName, int key, int mask) {
-        return super.createJMenuItem(label, tooltip, itemName, key, mask);
+        JMenuItem menuItem = new JMenuItem(label);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(key, mask));
+        menuItem.setMnemonic(mask);
+        menuItem.setRolloverEnabled(true);
+        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + itemName)));
+        menuItem.setToolTipText(tooltip);
+        return menuItem;
     }
 
     /**
-     * Creates a {@link JMenuItem} with the given parameter of a label from the
-     * name of the button, name of the image file, and tool tip description.Used
-     * to create a JMenuBar.
+     * Creates a {@link JMenuItem} with the given parameter of a label.Used to
+     * create a JMenuBar.It sets RollOverEnable to true.
      *
      * @param label
      * @param imageName
      * @param tooltip
      * @return the JMenuItem
      */
-    @Override
     protected JMenuItem createJMenutItem(String label, String imageName, String tooltip) {
-        return super.createJMenutItem(label, imageName, tooltip);
+        JMenuItem menuItem = new JMenuItem(label);
+        menuItem.setRolloverEnabled(true);
+        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + imageName)));
+        menuItem.setToolTipText(tooltip);
+        return menuItem;
+
     }
 
     /**
-     * Create a button with the given label and tool-tip.
+     * Create a button with the given label.
      *
      * @param label name of the resource (image)
-     * @param tooltip
+     * @param enabled
      * @return a button
      */
-    @Override
     protected JButton createJButton(String label, String tooltip) {
-        return super.createJButton(label, tooltip);
+        JButton button = new JButton();
+        button.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + label)));
+        button.setFocusPainted(true);
+        button.setRolloverEnabled(true);
+        button.setToolTipText(tooltip);
+        return button;
     }
 
     public static void main(String[] args) {
-        Main main = new Main();
+        uiMain main = new uiMain();
     }
 
 }
