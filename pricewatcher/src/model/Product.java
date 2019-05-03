@@ -259,10 +259,13 @@ public class Product {
                 String[] fixURL = sanitize[i].split("[?]");
                 sanitize[i] = fixURL[0];
             }
-            if (sanitize[i].equals("/")) {
+            if (sanitize[i].equals("/") || sanitize[i].equals("//")) {
                 sanitize[i] = "";
             }
             newUrl += sanitize[i] + "/";
+        }
+        if (newUrl.contains("//")) {
+            newUrl = newUrl.substring(0, newUrl.length() - 1);
         }
         setURL(newUrl);
     }

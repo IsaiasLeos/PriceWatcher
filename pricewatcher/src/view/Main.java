@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
@@ -429,21 +430,6 @@ public class Main extends uiMain {
     }
 
     /**
-     * Creates a {@link JToolBar} with the given buttons.
-     * <li>{@link #refreshButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #addButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #searchButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #moveUpButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #moveDownButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #singleRefreshButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #openWeb(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #deleteButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #editButtonClicked(java.awt.event.ActionEvent) }</li>
-     *
-     * @return JToolBar
-     */
-    @Override
-    /**
      * Creates a {@link JToolBar} with the given
      * buttons.<li>{@link #refreshButtonClicked(java.awt.event.ActionEvent)}</li>
      * <li>{@link #addButtonClicked(java.awt.event.ActionEvent)}</li>
@@ -458,6 +444,7 @@ public class Main extends uiMain {
      * @param title
      * @return JToolBar
      */
+    @Override
     protected JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
         JButton checkmark = createJButton("checkmark.png", "Check Item Prices");
@@ -532,20 +519,6 @@ public class Main extends uiMain {
         JMenuItem remove = createJMenutItem("Remove", "delete.png", "Delete Selected Item");
         remove.addActionListener((event) -> this.deleteButtonClicked(event));
         generatedPopupMenu.add(remove);
-        generatedPopupMenu.addSeparator();
-        JMenu generatedNestedMenu = new JMenu("Filter");
-//        JMenuItem amazonMenu = createJMenutItem("Amazon", "amazon.png", "Filter by Amazon Links");
-//        amazonMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("amazon"));
-//        generatedNestedMenu.add(amazonMenu);
-//        generatedPopupMenu.add(generatedNestedMenu);
-//        JMenuItem ebayMenu = createJMenutItem("eBay", "ebay.png", "Filter by eBay Links");
-//        ebayMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("ebay"));
-//        generatedNestedMenu.add(ebayMenu);
-//        generatedPopupMenu.add(generatedNestedMenu);
-//        JMenuItem walmartMenu = createJMenutItem("Walmart", "walmart.png", "Filter by Walmart Links");
-//        walmartMenu.addActionListener((event) -> this.sortAlgorithm.filterBy("walmart"));
-//        generatedNestedMenu.add(walmartMenu);
-        generatedPopupMenu.add(generatedNestedMenu);
         generatedPopupMenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.toClipboard(1));
