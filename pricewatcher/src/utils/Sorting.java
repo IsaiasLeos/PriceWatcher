@@ -5,6 +5,7 @@
  */
 package utils;
 
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -13,22 +14,28 @@ import storage.StorageManager;
 
 /**
  *
- * @author Blade
+ * @author Isaias Leos, Leslie Gomez
  */
 public class Sorting {
 
-    /**
-     *
-     */
-    public Sorting() {
-    }
+    private DefaultListModel defaultListModel;
+    private StorageManager storageManager;
+    public boolean isFilter = false;
 
     /**
      *
      * @param storageManager
      * @param defaultListModel
      */
-    public void sortOld(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public Sorting(StorageManager storageManager, DefaultListModel defaultListModel) {
+        this.defaultListModel = defaultListModel;
+        this.storageManager = storageManager;
+    }
+
+    /**
+     *
+     */
+    public void sortOld() {
         List<Product> products = storageManager.get();
         Collections.sort(products, (Product product2, Product product1) -> product2.getDate().compareTo(product1.getDate()));
         storageManager.set(products);
@@ -38,10 +45,8 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortNew(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortNew() {
         List<Product> products = storageManager.get();
         Collections.sort(products, (Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
         storageManager.set(products);
@@ -51,10 +56,8 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortNameAscending(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortNameAscending() {
         List<Product> products = storageManager.get();
         Collections.sort(products, (Product product2, Product product1) -> product2.getName().compareTo(product1.getName()));
         storageManager.set(products);
@@ -64,10 +67,8 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortNameDescending(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortNameDescending() {
         List<Product> products = storageManager.get();
         Collections.sort(products, (Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
         storageManager.set(products);
@@ -77,12 +78,10 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortHigh(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortHigh() {
         List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> ("" + product1.getCurrentPrice()).compareTo("" + product2.getCurrentPrice()));
+        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
         defaultListModel.addAll(products);
@@ -90,12 +89,10 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortLow(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortLow() {
         List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> ("" + product2.getCurrentPrice()).compareTo("" + product1.getCurrentPrice()));
+        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
         defaultListModel.addAll(products);
@@ -103,12 +100,10 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortChangeHigh(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortChangeHigh() {
         List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> ("" + product2.getChange()).compareTo("" + product1.getChange()));
+        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
         defaultListModel.addAll(products);
@@ -116,19 +111,62 @@ public class Sorting {
 
     /**
      *
-     * @param storageManager
-     * @param defaultListModel
      */
-    public void sortChangeLow(StorageManager storageManager, DefaultListModel defaultListModel) {
+    public void sortChangeLow() {
         List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> ("" + product2.getChange()).compareTo("" + product1.getChange()));
+        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
         defaultListModel.addAll(products);
     }
 
-    private void removeFilterBy() {
+    /**
+     *
+     * @param filter
+     */
+    public void filterBy(String filter) {
+        if (isFilter) {
+            removeFilter();
+        }
+        List<Product> products = storageManager.get();
+        products.removeIf(s -> !s.getURL().contains(filter));
+        storageManager.set(products);
+        defaultListModel.removeAllElements();
+        defaultListModel.addAll(products);
+        isFilter = true;
+    }
 
+    /**
+     *
+     * @param filter
+     */
+    public void filterName(String filter) {
+        if (isFilter) {
+            removeFilter();
+        }
+        List<Product> products = storageManager.get();
+        products.removeIf(s -> !s.getName().contains(filter));
+        storageManager.set(products);
+        defaultListModel.removeAllElements();
+        defaultListModel.addAll(products);
+        isFilter = true;
+    }
+
+    /**
+     *
+     */
+    public void removeFilter() {
+        if (isFilter) {
+            try {
+                storageManager.remove();
+                storageManager.fromJSON();
+                storageManager.get().forEach((element) -> defaultListModel.addElement(element));
+                isFilter = false;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
 }

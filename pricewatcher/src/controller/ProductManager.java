@@ -67,4 +67,11 @@ public class ProductManager {
         this.arrOfProducts = arrOfProducts;
     }
 
+    /**
+     *
+     */
+    public void remove() {
+        this.arrOfProducts = new ArrayList<>();
+    }
+
 }

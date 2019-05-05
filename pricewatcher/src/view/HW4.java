@@ -34,11 +34,11 @@ import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.ComponentUI;
 import utils.Sorting;
 
 /**
@@ -63,11 +63,11 @@ public class HW4 extends HW3 {
     @Override
     protected void createUI() {
         JPanel drawingBoard = new JPanel();
-        this.sortAlgorithm = new Sorting();
         popupmenu = createJPopupMenu();
         storageManager = new StorageManager();
         defaultListModel = createListModel(storageManager);
         viewListCell = createJList(defaultListModel);
+        sortAlgorithm = new Sorting(storageManager, defaultListModel);
         viewListCell.addMouseListener(mouseListener());
         viewListCell.addMouseMotionListener(mouseMotionListener());
         viewListCell.setVisibleRowCount(3);
@@ -210,7 +210,6 @@ public class HW4 extends HW3 {
      *
      * @param event
      */
-    @SuppressWarnings("deprecation")
     @Override
     protected void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {
@@ -218,9 +217,8 @@ public class HW4 extends HW3 {
                 setPrice(defaultListModel.get(i));
             }
             repaint();
-            showMessage("Refreshing...", 4);
         } else {
-            showMessage("Product List is Empty", 4);
+            JOptionPane.showMessageDialog(this, "Product List is Empty");
         }
 
     }
@@ -230,15 +228,13 @@ public class HW4 extends HW3 {
      *
      * @param event
      */
-    @SuppressWarnings("deprecation")
     @Override
     protected void singleRefreshButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
             setPrice(defaultListModel.get(viewListCell.getSelectedIndex()));
             repaint();
-            showMessage("Refreshing...", 4);
         } else {
-            showMessage("Not Selecting an Item", 4);
+            JOptionPane.showMessageDialog(this, "Not Selecting an Item");
         }
     }
 
@@ -273,11 +269,10 @@ public class HW4 extends HW3 {
                 setPrice(generatedProduct);
                 defaultListModel.addElement(generatedProduct);
                 storageManager.add(generatedProduct);
-                showMessage("Product Successfully Added", 4);
             } catch (NumberFormatException e) {
-                showMessage("Please re-enter correct information.", 4);
+                JOptionPane.showMessageDialog(this, "Please re-enter correct information.");
             } catch (IllegalArgumentException e) {
-                showMessage("Please re-enter correct information.", 4);
+                JOptionPane.showMessageDialog(this, "Please re-enter correct information.");
             }
         }
         //Cancel 
@@ -311,11 +306,7 @@ public class HW4 extends HW3 {
                 0,
                 new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
         if (option == 0) {
-            for (int i = 0; i < defaultListModel.getSize(); i++) {
-                if (defaultListModel.get(i).getName().toLowerCase().contains(search.getText().toLowerCase())) {
-
-                }
-            }
+            sortAlgorithm.filterName(search.getText());
             repaint();
         }
     }
@@ -336,7 +327,7 @@ public class HW4 extends HW3 {
                 repaint();
             }
         } else {
-            showMessage("Not Selecting an Item", 4);
+            JOptionPane.showMessageDialog(this, "Not Selecting an Item.");
         }
     }
 
@@ -373,9 +364,8 @@ public class HW4 extends HW3 {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setURL(url.getText());
                     setPrice(defaultListModel.get(viewListCell.getSelectedIndex()));
                     repaint();
-                    showMessage("Succesfully Edited a Product", 4);
                 } catch (NumberFormatException e) {
-                    showMessage("Please re-enter correct information.", 4);
+                    JOptionPane.showMessageDialog(this, "Please re-enter correct information.");
                 }
             }
             //Close Button
@@ -387,13 +377,14 @@ public class HW4 extends HW3 {
 
             }
         } else {
-            showMessage("Not Selecting an Item", 4);
+            JOptionPane.showMessageDialog(this, "Not selecting an item.");
         }
     }
 
     /**
      *
      */
+    @Override
     protected void openClickableActionWeb() {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
@@ -402,8 +393,6 @@ public class HW4 extends HW3 {
                 e.printStackTrace();
             }
         }
-        showMessage("Opening Webpage", 4);
-
     }
 
     /**
@@ -420,6 +409,8 @@ public class HW4 extends HW3 {
         int size = defaultListModel.getSize();
         if (size > -1) {
             viewListCell.setSelectedIndex(size);
+        } else {
+            JOptionPane.showMessageDialog(this, "No items available.");
         }
     }
 
@@ -427,6 +418,8 @@ public class HW4 extends HW3 {
     protected void moveUpButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {
             viewListCell.setSelectedIndex(0);
+        } else {
+            JOptionPane.showMessageDialog(this, "No items available.");
         }
     }
 
@@ -521,7 +514,28 @@ public class HW4 extends HW3 {
         remove.addActionListener((event) -> this.deleteButtonClicked(event));
         generatedPopupMenu.add(remove);
         generatedPopupMenu.addSeparator();
+        JMenu filterMenu = new JMenu("Sort");
+        ButtonGroup buttonGroup = new ButtonGroup();
+        JMenuItem removeFilter = new JRadioButtonMenuItem("Remove Filter");
+        removeFilter.addActionListener((event) -> this.sortAlgorithm.removeFilter());
+        buttonGroup.add(removeFilter);
+        filterMenu.add(removeFilter);
+        JMenuItem filterAmazon = new JRadioButtonMenuItem("Amazon");
+        filterAmazon.addActionListener((event) -> this.sortAlgorithm.filterBy("amazon"));
+        buttonGroup.add(filterAmazon);
+        filterMenu.add(filterAmazon);
+        JMenuItem filterEbay = new JRadioButtonMenuItem("Ebay");
+        filterEbay.addActionListener((event) -> this.sortAlgorithm.filterBy("ebay"));
+        buttonGroup.add(filterEbay);
+        filterMenu.add(filterEbay);
+        JMenuItem filterWalmart = new JRadioButtonMenuItem("Walmart");
+        filterWalmart.addActionListener((event) -> this.sortAlgorithm.filterBy("walmart"));
+        buttonGroup.add(filterWalmart);
+        filterMenu.add(filterWalmart);
+        filterMenu.addSeparator();
         JMenuItem cname = new JMenuItem("Copy Name");
+        generatedPopupMenu.add(filterMenu);
+        generatedPopupMenu.addSeparator();
         cname.addActionListener((event) -> this.toClipboard(1));
         generatedPopupMenu.add(cname);
         JMenuItem curl = new JMenuItem("Copy URL");
@@ -530,6 +544,7 @@ public class HW4 extends HW3 {
         JMenuItem citem = new JMenuItem("Copy Item");
         citem.addActionListener((event) -> this.toClipboard(3));
         generatedPopupMenu.add(citem);
+
         return generatedPopupMenu;
     }
 
@@ -575,7 +590,7 @@ public class HW4 extends HW3 {
                 }
             }
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-            System.err.println("Failed to apply themes" + e);
+            JOptionPane.showMessageDialog(this, "Failed to apply themes.");
         }
         SwingUtilities.updateComponentTreeUI(this);
     }
@@ -621,10 +636,10 @@ public class HW4 extends HW3 {
         add.addActionListener((event) -> this.addButtonClicked(event));
         editMenu.add(add);
         editMenu.add(new JSeparator());
-//        JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
-//        search.addActionListener((event) -> this.searchButtonClicked(event));
-//        search.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "search.png")));
-//        editMenu.add(search);
+        JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
+        search.addActionListener((event) -> this.searchButtonClicked(event));
+        search.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "search.png")));
+        editMenu.add(search);
         JMenuItem forward = createJMenuItem("Select First", "Move to First Item", "up.png", KeyEvent.VK_UP, ActionEvent.ALT_MASK);
         forward.addActionListener((event) -> this.moveUpButtonClicked(event));
         editMenu.add(forward);
@@ -636,40 +651,39 @@ public class HW4 extends HW3 {
         JMenu sortMenu = new JMenu("Sort");
         ButtonGroup buttonGroup = new ButtonGroup();
         JMenuItem oldest = new JRadioButtonMenuItem("Oldest");
-        oldest.addActionListener((event) -> this.sortAlgorithm.sortOld(storageManager, defaultListModel));
+        oldest.addActionListener((event) -> this.sortAlgorithm.sortOld());
         buttonGroup.add(oldest);
         sortMenu.add(oldest);
         JMenuItem newest = new JRadioButtonMenuItem("Newest");
-        newest.addActionListener((event) -> this.sortAlgorithm.sortNew(storageManager, defaultListModel));
+        newest.addActionListener((event) -> this.sortAlgorithm.sortNew());
         buttonGroup.add(newest);
         sortMenu.add(newest);
         sortMenu.addSeparator();
         JMenuItem ascend = new JRadioButtonMenuItem("Ascending Order");
-        ascend.addActionListener((event) -> this.sortAlgorithm.sortNameAscending(storageManager, defaultListModel));
+        ascend.addActionListener((event) -> this.sortAlgorithm.sortNameAscending());
         buttonGroup.add(ascend);
         sortMenu.add(ascend);
         JMenuItem descend = new JRadioButtonMenuItem("Descending Order");
-        descend.addActionListener((event) -> this.sortAlgorithm.sortNameDescending(storageManager, defaultListModel));
+        descend.addActionListener((event) -> this.sortAlgorithm.sortNameDescending());
         buttonGroup.add(descend);
         sortMenu.add(descend);
         sortMenu.addSeparator();
         JMenuItem low = new JRadioButtonMenuItem("Lowest Price ($)");
-        low.addActionListener((event) -> this.sortAlgorithm.sortLow(storageManager, defaultListModel));
+        low.addActionListener((event) -> this.sortAlgorithm.sortLow());
         buttonGroup.add(low);
         sortMenu.add(low);
         JMenuItem high = new JRadioButtonMenuItem("Highest Price ($)");
-        high.addActionListener((event) -> this.sortAlgorithm.sortHigh(storageManager, defaultListModel));
+        high.addActionListener((event) -> this.sortAlgorithm.sortHigh());
         buttonGroup.add(high);
         sortMenu.add(high);
         JMenuItem priceChangeHigh = new JRadioButtonMenuItem("High Price Change (%)");
-        priceChangeHigh.addActionListener((event) -> this.sortAlgorithm.sortChangeHigh(storageManager, defaultListModel));
+        priceChangeHigh.addActionListener((event) -> this.sortAlgorithm.sortChangeHigh());
         buttonGroup.add(priceChangeHigh);
         sortMenu.add(priceChangeHigh);
         JMenuItem priceChangeLow = new JRadioButtonMenuItem("Low Price Change (%)");
-        priceChangeLow.addActionListener((event) -> this.sortAlgorithm.sortChangeLow(storageManager, defaultListModel));
+        priceChangeLow.addActionListener((event) -> this.sortAlgorithm.sortChangeLow());
         buttonGroup.add(priceChangeLow);
         sortMenu.add(priceChangeLow);
-
         JMenu generatedNestedMenu = new JMenu("Selected");
         JMenuItem priceNested = createJMenutItem("Price", "checkmark.png", "Check Prices");
         priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
