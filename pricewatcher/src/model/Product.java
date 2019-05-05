@@ -25,12 +25,13 @@ public class Product {
     private boolean sound;
 
     /**
-     *
+     * Default Constructor
      */
     public Product() {
     }
 
     /**
+     * Creates a product given all the parameters.
      *
      * @param url
      * @param name
@@ -75,24 +76,27 @@ public class Product {
     }
 
     /**
+     * Returns a boolean that indicates if the current Product can play a sound.
      *
-     * @return
+     * @return {@link Boolean} flag
      */
     public boolean getSound() {
         return sound;
     }
 
     /**
+     * Sets a boolean that indicates if the current Product can play a sound.
      *
-     * @param playSound
+     * @param playSound flag
      */
     public void setSound(boolean playSound) {
         this.sound = playSound;
     }
 
     /**
+     * Returns the current URL of the Product.
      *
-     * @return returns the current URL of the item being watched.
+     * @return {@link String} URL
      */
     public String getURL() {
         return url;
@@ -101,16 +105,16 @@ public class Product {
     /**
      * Replaces the current URL of the item being watched.
      *
-     * @param url the name of the URL that will be replacing the current item
-     * name.
+     * @param url {@link String} URL
      */
     public void setURL(String url) {
         this.url = url;
     }
 
     /**
+     * Returns the name of the current item.
      *
-     * @return returns the name of the current item.
+     * @return {@link String} Name
      */
     public String getName() {
         return name;
@@ -119,15 +123,16 @@ public class Product {
     /**
      * Replaces the current Name of the item being watched.
      *
-     * @param name the name of the item that will be replacing the current item.
+     * @param name {@link String}
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
+     * Returns the price of the current item.
      *
-     * @return returns the price of the current item.
+     * @return {@link Double} Current Price
      */
     public double getCurrentPrice() {
         return currentPrice;
@@ -144,8 +149,9 @@ public class Product {
     }
 
     /**
+     * Returns the current date of when the product was added.
      *
-     * @return the current date of when the product was added
+     * @return {@link String}
      */
     public String getDate() {
         return date;
@@ -161,8 +167,9 @@ public class Product {
     }
 
     /**
+     * Return the value of change between the initial price and the new price.
      *
-     * @return the value of change between the initial price and the new price.
+     * @return {@link Double} Change
      */
     public double getChange() {
         return change;
@@ -180,7 +187,7 @@ public class Product {
     /**
      * Get the initial price of a product.
      *
-     * @return
+     * @return {@link Double} Starting Price
      */
     public double getStartingPrice() {
         return startingPrice;
@@ -196,8 +203,12 @@ public class Product {
     }
 
     /**
+     * Returns the current icon that will Render with this specific Product.
      *
-     * @return
+     * See {@link view.ItemView} for more information on what image will be
+     * rendering.
+     *
+     * @return {@link Image}
      */
     public Image getIcon() {
         if (productIcon == null) {
@@ -207,6 +218,7 @@ public class Product {
     }
 
     /**
+     * Sets the icon that will Render with this specific Product
      *
      * @param icon
      */
@@ -231,6 +243,9 @@ public class Product {
         return null;
     }
 
+    /**
+     * Will remove unwanted information from an Amazon Link.
+     */
     private void urlSanitize() {
         String[] sanitize = url.split("/");
         String newUrl = "";

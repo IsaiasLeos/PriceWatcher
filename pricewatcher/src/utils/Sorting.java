@@ -13,6 +13,8 @@ import model.Product;
 import storage.StorageManager;
 
 /**
+ * This class is in charge of sorting and filters everything from
+ * {@link controller.ProductManager} and {@link DefaultListModel}
  *
  * @author Isaias Leos, Leslie Gomez
  */
@@ -23,6 +25,7 @@ public class Sorting {
     public boolean isFilter = false;
 
     /**
+     * Default Constructor.
      *
      * @param storageManager
      * @param defaultListModel
@@ -33,7 +36,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} from oldest
+     * date.
      */
     public void sortOld() {
         List<Product> products = storageManager.get();
@@ -44,7 +48,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} from newest
+     * date.
      */
     public void sortNew() {
         List<Product> products = storageManager.get();
@@ -55,7 +60,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into ascending
+     * order.
      */
     public void sortNameAscending() {
         List<Product> products = storageManager.get();
@@ -66,7 +72,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into
+     * Descending order.
      */
     public void sortNameDescending() {
         List<Product> products = storageManager.get();
@@ -77,7 +84,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into highest
+     * priced.
      */
     public void sortHigh() {
         List<Product> products = storageManager.get();
@@ -88,7 +96,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into lowest
+     * priced.
      */
     public void sortLow() {
         List<Product> products = storageManager.get();
@@ -99,7 +108,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into highest
+     * price change.
      */
     public void sortChangeHigh() {
         List<Product> products = storageManager.get();
@@ -110,7 +120,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Sorts the JList and {@link controller.ProductManager} into lowest
+     * price change.
      */
     public void sortChangeLow() {
         List<Product> products = storageManager.get();
@@ -121,6 +132,8 @@ public class Sorting {
     }
 
     /**
+     * Filters the JList and {@link controller.ProductManager} given the
+     * URL.
      *
      * @param filter
      */
@@ -137,6 +150,8 @@ public class Sorting {
     }
 
     /**
+     * Filters the JList and {@link controller.ProductManager} given the
+     * name of the product.
      *
      * @param filter
      */
@@ -153,7 +168,8 @@ public class Sorting {
     }
 
     /**
-     *
+     * Removes the current filter applied to the JList and
+     * {@link controller.ProductManager}.
      */
     public void removeFilter() {
         if (isFilter) {

@@ -8,6 +8,9 @@ public class ProductManager {
 
     private List<Product> arrOfProducts;
 
+    /**
+     * Generates a Empty list of {@link model.Product}.
+     */
     public ProductManager() {
         this.arrOfProducts = new ArrayList<>();
     }
@@ -39,6 +42,7 @@ public class ProductManager {
     }
 
     /**
+     * Creates a {@link model.Product} and adds it to the existing ArrayList.
      *
      * @param name
      * @param date
@@ -68,7 +72,7 @@ public class ProductManager {
     }
 
     /**
-     *
+     * Removes all {@link model.Product}s from the existing ArrayList.
      */
     public void remove() {
         this.arrOfProducts = new ArrayList<>();

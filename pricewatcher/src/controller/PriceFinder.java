@@ -6,20 +6,21 @@ import java.math.RoundingMode;
 import java.util.Random;
 
 /**
- * This class handles the logic and memory storage of the item.
+ * This class handles obtaining the price of an item. This class also simulates
+ * a prices given no URL.
  *
- * @author Isaias Leos
+ * @author Isaias Leos, Leslie Gomez
  */
 public class PriceFinder extends WebScrape {
 
     /**
-     *
+     * Default Constructor
      */
     public PriceFinder() {
     }
 
     /**
-     *
+     * Scrapes a web-site and obtains the price of an item, given the URL.
      *
      * @param url
      * @return

@@ -118,6 +118,7 @@ public class ItemView extends JPanel {
     }
 
     /**
+     * This sets the products inside of the renderer.
      *
      * @param product
      */
