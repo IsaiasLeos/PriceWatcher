@@ -34,7 +34,6 @@ import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;

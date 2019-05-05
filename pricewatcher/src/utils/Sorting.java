@@ -40,7 +40,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> product2.getDate().compareTo(product1.getDate()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -51,7 +51,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -62,7 +62,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> product2.getName().compareTo(product1.getName()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -73,7 +73,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -84,7 +84,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -95,7 +95,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -106,7 +106,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -117,7 +117,7 @@ public class Sorting {
         Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
     }
 
     /**
@@ -132,7 +132,7 @@ public class Sorting {
         products.removeIf(s -> !s.getURL().contains(filter));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
         isFilter = true;
     }
 
@@ -148,7 +148,7 @@ public class Sorting {
         products.removeIf(s -> !s.getName().contains(filter));
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        defaultListModel.addAll(products);
+        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
         isFilter = true;
     }
 

@@ -1,1 +1,42 @@
-[{"date":"05/03/2019","change":0,"sound":false,"name":"Table","currentPrice":139.99,"startingPrice":139.99,"URL":"https://www.amazon.com/dp/B01CYDYXHG//"}]
+[
+  {
+    "date": "05/01/2019",
+    "sound": true,
+    "change": 250.88,
+    "name": "Flashlight",
+    "icon": "BufferedImage@1a0de14b: type = 6 ColorModel: #pixelBits = 32 numComponents = 4 color space = java.awt.color.ICC_ColorSpace@4a203f3b transparency = 3 has alpha = true isAlphaPre = false ByteInterleavedRaster: width = 24 height = 24 #numDataElements 4 dataOff[0] = 3",
+    "currentPrice": 3.99,
+    "startingPrice": 14,
+    "URL": "https://www.ebay.com/itm/10000LM-LED-18650-Flashlight-Zoom-Focus-Torch-Light-Lamp-Bright-Light/381646856537?_trkparms=5373%3A5000015439%7C5374%3ASporting+Goods%7C5079%3A5000015439"
+  },
+  {
+    "date": "05/02/2019",
+    "sound": false,
+    "change": -15.96,
+    "name": "Flashlight v2",
+    "icon": "BufferedImage@1e3266d2: type = 6 ColorModel: #pixelBits = 32 numComponents = 4 color space = java.awt.color.ICC_ColorSpace@4a203f3b transparency = 3 has alpha = true isAlphaPre = false ByteInterleavedRaster: width = 24 height = 24 #numDataElements 4 dataOff[0] = 3",
+    "currentPrice": 3.57,
+    "startingPrice": 3,
+    "URL": "https://www.ebay.com/itm/HOT-T6-Tactical-Military-LED-Flashlight-Torch-50000LM-Zoomable-5-Mode-for-18650/183770977509?_trkparms=aid%3D555018%26algo%3DPL.SIM%26ao%3D1%26asc%3D57475%26meid%3D1a6078e0986a497fbfa7c88aaa18a8b5%26pid%3D100005%26rk%3D4%26rkt%3D12%26mehot%3Dag%26sd%3D381646856537%26itm%3D183770977509&_trksid=p2047675.c100005.m1851"
+  },
+  {
+    "date": "05/03/2019",
+    "sound": false,
+    "change": 0,
+    "name": "Beanie Baby",
+    "icon": "BufferedImage@13530f19: type = 6 ColorModel: #pixelBits = 32 numComponents = 4 color space = java.awt.color.ICC_ColorSpace@4a203f3b transparency = 3 has alpha = true isAlphaPre = false ByteInterleavedRaster: width = 24 height = 24 #numDataElements 4 dataOff[0] = 3",
+    "currentPrice": 525,
+    "startingPrice": 525,
+    "URL": "https://www.ebay.com/itm/Ty-Beanie-Baby-Babies-Authenticated-Ultra-Rare-Patti-1st-Swing-Tush-Tags-Korea/183797718930?hash=item2acb329f92:g:m2AAAOSwBNNczIHz"
+  },
+  {
+    "date": "05/04/2019",
+    "sound": true,
+    "change": -99.9,
+    "name": "Stryker L9000",
+    "icon": "BufferedImage@39bf8c7c: type = 6 ColorModel: #pixelBits = 32 numComponents = 4 color space = java.awt.color.ICC_ColorSpace@4a203f3b transparency = 3 has alpha = true isAlphaPre = false ByteInterleavedRaster: width = 24 height = 24 #numDataElements 4 dataOff[0] = 3",
+    "currentPrice": 1100,
+    "startingPrice": 1,
+    "URL": "https://www.ebay.com/itm/Stryker-L9000-Light-Source-220-210-000-LED/123662452397?epid=1901757075&hash=item1ccadb46ad:g:lGQAAOSwft9ap9Un"
+  }
+]
