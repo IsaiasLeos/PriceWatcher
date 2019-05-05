@@ -16,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
@@ -34,10 +33,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.ComponentUI;
 import utils.Sorting;
 
 /**
@@ -53,6 +54,7 @@ public class HW4 extends HW3 {
     private Sorting sortAlgorithm;
     private JPopupMenu popupmenu;
     private JList viewListCell;
+    private JProgressBar download;
 
     /**
      * Create and Configure the GUI.
@@ -69,16 +71,19 @@ public class HW4 extends HW3 {
         viewListCell.addMouseListener(mouseListener());
         viewListCell.addMouseMotionListener(mouseMotionListener());
         viewListCell.setVisibleRowCount(3);
-        drawingBoard.add(new JScrollPane(viewListCell));
+        download = new JProgressBar();
+        download.setVisible(false);
+        drawingBoard.add(new JScrollPane(viewListCell), BorderLayout.CENTER);
         drawingBoard.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(10, 16, 0, 16),
+                BorderFactory.createEmptyBorder(5, 16, 0, 16),
                 BorderFactory.createLineBorder(Color.WHITE)));
         drawingBoard.setLayout(new GridLayout(1, 1));
-        msgBar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 0));
+        msgBar.setBorder(BorderFactory.createEmptyBorder(0, 16, 5, 0));
         setJMenuBar(createJMenuBar());
         add(createJToolBar("ToolBar"), BorderLayout.NORTH);
         add(drawingBoard, BorderLayout.CENTER);
-        add(msgBar, BorderLayout.AFTER_LAST_LINE);
+        //add(msgBar, BorderLayout.AFTER_LAST_LINE);
+        add(download, BorderLayout.AFTER_LAST_LINE);
     }
 
     /**
@@ -152,14 +157,19 @@ public class HW4 extends HW3 {
      * @param product
      */
     private void setPrice(Product product) {
+
         PriceFinder webPrice = new PriceFinder();
         new Thread(() -> {
+            int progress = 0;
+            download.setVisible(true);
             Double price = webPrice.getPrice(product.getURL());
+            progress += 30;
+            download.setValue(progress);
             if (price == -1) {
                 JLabel label = new JLabel(""
                         + "<html>"
                         + "<center>"
-                        + "Error downloading information!<br>The following is invalid link or has no current price available.<br>Want to open it in your browser?"
+                        + "Error downloading information!<br>The following is not supported or has no current price available.<br>Want to open it in your browser?"
                         + "</center>"
                         + "</html>");
                 label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -174,21 +184,24 @@ public class HW4 extends HW3 {
                     }
                 }
             } else {
-                try {
-                    if (product.getStartingPrice() == 0) {
-                        product.setStartingPrice(price);
-                        product.setCurrentPrice(price);
-                    } else {
-                        product.checkPrice(price);
-                    }
-                    storageManager.toStorage(storageManager.toJSON());
-                    Thread.sleep(500);
-                    showMessage("Saving...", 4);
-                    repaint();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                progress += 15;
+                download.setValue(progress);
+                if (product.getStartingPrice() == 0) {
+                    product.setStartingPrice(price);
+                    product.setCurrentPrice(price);
+                } else {
+                    product.checkPrice(price);
                 }
+                progress += 30;
+                download.setValue(progress);
+                storageManager.toStorage(storageManager.toJSON());
+                progress += 25;
+                download.setValue(progress);
+                repaint();
             }
+            progress = 0;
+            download.setValue(progress);
+            download.setVisible(false);
         }).start();
     }
 

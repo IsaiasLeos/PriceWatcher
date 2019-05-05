@@ -13,7 +13,7 @@ import java.util.Random;
 public class PriceFinder extends WebScrape {
 
     /**
-     * 
+     *
      */
     public PriceFinder() {
     }

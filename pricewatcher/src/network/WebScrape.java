@@ -80,6 +80,7 @@ public class WebScrape {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    
                     priceOutput = findPrice(line);
                     if (!priceOutput.equals("")
                             && (line.contains("notranslate") && !line.contains("notranslate mm-strkthru"))
