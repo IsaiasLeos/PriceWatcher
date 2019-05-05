@@ -31,42 +31,25 @@ public class Product {
     }
 
     /**
-     * Alternative constructor for the product with given information.
-     *
-     * @param name name of product
-     * @param url current URL of the product
-     * @param date date product was added
-     */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Product(String url, String name, String date) {
-        this.url = url;
-        this.name = name;
-        this.currentPrice = startingPrice;
-        this.date = date;
-        this.productIcon = getImage("webbrowser.png");
-        if (this.url.contains("amazon")) {
-            urlSanitize();
-        }
-    }
-
-    /**
-     * Alternative constructor for the product with given information.
      *
      * @param url
      * @param name
-     * @param startingPrice
      * @param date
+     * @param currentPrice
+     * @param change
+     * @param startingPrice
+     * @param productIcon
+     * @param sound
      */
-    public Product(String url, String name, double startingPrice, String date) {
+    public Product(String url, String name, String date, double currentPrice, double change, double startingPrice, Image productIcon, boolean sound) {
         this.url = url;
         this.name = name;
-        this.startingPrice = startingPrice;
-        this.currentPrice = this.startingPrice;
         this.date = date;
-        this.productIcon = getImage("webbrowser.png");
-        if (this.url.contains("amazon")) {
-            urlSanitize();
-        }
+        this.currentPrice = currentPrice;
+        this.change = change;
+        this.startingPrice = startingPrice;
+        this.productIcon = getIcon();
+        this.sound = sound;
     }
 
     /**

@@ -28,7 +28,6 @@ public class StorageManager extends ProductManager {
      * @return
      */
     public JSONArray toJSON() {
-
         return new JSONArray(get());
     }
 
@@ -47,15 +46,14 @@ public class StorageManager extends ProductManager {
     public void fromJSON() throws FileNotFoundException {
         JSONTokener tokener = new JSONTokener(new FileInputStream(new File("src/resources/products.json")));
         JSONArray productListJSON = new JSONArray(tokener);
-
         for (int i = 0; i < productListJSON.length(); i++) {
             JSONObject productJSON = productListJSON.getJSONObject(i);
             create(productJSON.getString("name"),
                     productJSON.getString("date"),
-                    productJSON.getInt("currentPrice"),
-                    productJSON.getInt("startingPrice"),
+                    productJSON.getDouble("currentPrice"),
+                    productJSON.getDouble("startingPrice"),
                     productJSON.getString("URL"),
-                    productJSON.getInt("change")
+                    productJSON.getDouble("change")
             );
         }
 

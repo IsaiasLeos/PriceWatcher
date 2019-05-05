@@ -13,19 +13,19 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Isaias Leos, Leslie Gomez
  */
-public class WebServerSocket {
+public class WebScrape {
 
     /**
      *
      */
-    public WebServerSocket() {
+    public WebScrape() {
     }
 
     /**
      * Obtains the price of the {@link model.Product} according to the URL
      * handle.
      *
-     * @param url product's url handle
+     * @param url product's URL handle
      * @return return -1 if couldn't connect webpage otherwise product price
      */
     public double priceScrape(String url) {
@@ -55,6 +55,15 @@ public class WebServerSocket {
         if (matcher.find()) {
             output = matcher.group();
         }
+        if (input.contains(",")) {
+            String[] tokens = input.split(">|=");
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].equals("\"\" content")) {
+                    output = tokens[i + 1];
+                    output = output.replaceAll("[\"]", "");
+                }
+            }
+        }
         return output;
     }
 
@@ -72,12 +81,17 @@ public class WebServerSocket {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     priceOutput = findPrice(line);
-                    if (!priceOutput.equals("") && line.contains("notranslate")) {
-                        return Double.parseDouble(priceOutput.substring(1, priceOutput.length()));
+                    if (!priceOutput.equals("")
+                            && (line.contains("notranslate") && !line.contains("notranslate mm-strkthru"))
+                            && !line.contains("notranslate vi-vpo-strkthru vi-vpo-now")) {
+                        if (priceOutput.contains("$")) {
+                            return Double.parseDouble(priceOutput.substring(1, priceOutput.length()));
+                        } else {
+                            return Double.parseDouble(priceOutput);
+                        }
                     }
                 }
             }
-            System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,7 +126,6 @@ public class WebServerSocket {
                     return Double.parseDouble(output.substring(1, output.length()));
                 }
             }
-            System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,11 +151,10 @@ public class WebServerSocket {
                     }
                 }
             }
-            System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();
         }
         return -1.00;
     }
-    
+
 }

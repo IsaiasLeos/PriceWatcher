@@ -1,6 +1,6 @@
 package controller;
 
-import network.WebServerSocket;
+import network.WebScrape;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
@@ -10,7 +10,7 @@ import java.util.Random;
  *
  * @author Isaias Leos
  */
-public class PriceFinder extends WebServerSocket {
+public class PriceFinder extends WebScrape {
 
     /**
      * 

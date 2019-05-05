@@ -46,7 +46,7 @@ import utils.Sorting;
  * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
-public class Main extends uiMain {
+public class HW4 extends HW3 {
 
     private DefaultListModel<Product> defaultListModel;
     private StorageManager storageManager;
@@ -148,19 +148,6 @@ public class Main extends uiMain {
     }
 
     /**
-     * Create a {@link model.Product} given the parameters.
-     *
-     * @param itemURL the URL that links to the item
-     * @param itemName the name of the product
-     * @param itemPrice the initial price of the item
-     * @param itemDateAdded the date of when the product was added
-     * @return
-     */
-    private Product createProduct(String itemURL, String itemName, String itemDateAdded) {
-        return new Product(itemURL, itemName, itemDateAdded);
-    }
-
-    /**
      *
      * @param product
      */
@@ -176,7 +163,7 @@ public class Main extends uiMain {
                         + "</center>"
                         + "</html>");
                 label.setHorizontalAlignment(SwingConstants.CENTER);
-                int option = JOptionPane.showConfirmDialog(this, label, "Error", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "network.png")));
+                int option = JOptionPane.showConfirmDialog(HW4.this, label, "Error", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(HW4.this.getClass().getClassLoader().getResource("resources/" + "network.png")));
                 if (option == 0) {
                     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                         try {
@@ -194,8 +181,9 @@ public class Main extends uiMain {
                     } else {
                         product.checkPrice(price);
                     }
-                    Thread.sleep(500);
                     storageManager.toStorage(storageManager.toJSON());
+                    Thread.sleep(500);
+                    showMessage("Saving...", 4);
                     repaint();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -268,7 +256,7 @@ public class Main extends uiMain {
         //OK
         if (option == 0) {
             try {
-                Product generatedProduct = createProduct(url.getText(), name.getText(), getCurrentDate());
+                Product generatedProduct = new Product(url.getText(), name.getText(), super.getCurrentDate(), 0.0, 0.0, 0.0, null, false);
                 setPrice(generatedProduct);
                 defaultListModel.addElement(generatedProduct);
                 storageManager.add(generatedProduct);
@@ -745,7 +733,7 @@ public class Main extends uiMain {
     }
 
     public static void main(String[] args) {
-        Main main = new Main();
+        HW4 main = new HW4();
     }
 
 }

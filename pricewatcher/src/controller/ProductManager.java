@@ -38,12 +38,21 @@ public class ProductManager {
         return this.arrOfProducts;
     }
 
-    public void create(String name, String date, int currentPrice, int startingPrice, String URL, int change) {
+    /**
+     *
+     * @param name
+     * @param date
+     * @param currentPrice
+     * @param startingPrice
+     * @param URL
+     * @param change
+     */
+    public void create(String name, String date, double currentPrice, double startingPrice, String URL, double change) {
         Product generated = new Product();
         generated.setName(name);
         generated.setDate(date);
-        generated.setStartingPrice(startingPrice);
         generated.setCurrentPrice(currentPrice);
+        generated.setStartingPrice(startingPrice);
         generated.setURL(URL);
         generated.setChange(change);
         add(generated);

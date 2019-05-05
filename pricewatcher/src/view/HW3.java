@@ -50,7 +50,7 @@ import javax.swing.SwingUtilities;
  * @author Isaias Leos, Leslie Gomez
  */
 @SuppressWarnings("serial")
-public class uiMain extends JFrame {
+public class HW3 extends JFrame {
 
     protected JLabel msgBar = new JLabel("");
     private JList viewListCell;
@@ -63,7 +63,7 @@ public class uiMain extends JFrame {
     /**
      * Create a Dialog of Default Size (600,400).
      */
-    public uiMain() {
+    public HW3() {
         this(new Dimension(600, 400));
     }
 
@@ -73,7 +73,7 @@ public class uiMain extends JFrame {
      * @param dim
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public uiMain(Dimension dim) {
+    public HW3(Dimension dim) {
         super("Price Watcher");
         createDefaultProduct();
         setLayout(new BorderLayout());
@@ -212,11 +212,10 @@ public class uiMain extends JFrame {
      * @param itemURL the URL that links to the item
      * @param itemName the name of the product
      * @param itemPrice the initial price of the item
-     * @param itemDateAdded the date of when the product was added
      * @return
      */
-    protected Product createProduct(String itemURL, String itemName, double itemPrice, String itemDateAdded) {
-        return new Product(itemURL, itemName, itemPrice, itemDateAdded);
+    protected Product createProduct(String itemURL, String itemName, double itemPrice) {
+        return new Product(itemURL, itemName, getCurrentDate(), itemPrice, 0.0, itemPrice, null, false);
     }
 
     /**
@@ -228,8 +227,7 @@ public class uiMain extends JFrame {
         String productURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
         String productName = "Nintendo Switch";
         double productInitialPrice = 359.99;
-        String productDateAdded = "1/30/2019";
-        originalProductManager.add(createProduct(productURL, productName, productInitialPrice, productDateAdded));
+        originalProductManager.add(createProduct(productURL, productName, productInitialPrice));
         defaultListModel = createListModel(originalProductManager);
         webPrice = new PriceFinder();
     }
@@ -289,7 +287,7 @@ public class uiMain extends JFrame {
         //OK
         if (option == 0) {
             try {
-                Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()), getCurrentDate());
+                Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()));
                 defaultListModel.addElement(generatedProduct);
                 showMessage("Product Successfully Added", 4);
             } catch (NumberFormatException e) {
@@ -816,7 +814,7 @@ public class uiMain extends JFrame {
     }
 
     public static void main(String[] args) {
-        uiMain main = new uiMain();
+        HW3 main = new HW3();
     }
 
 }
