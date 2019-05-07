@@ -21,21 +21,20 @@ import org.json.JSONTokener;
  * This class is in charge of maintaining storing information and reading it
  * maintaining offline storage.
  *
- * @author Blade
+ * @author Isaias Leos
  */
 public class StorageManager extends ProductManager {
 
     /**
-     * Generates a JSONArray from the current {@link controller.ProductManager}.
      *
-     * @return {@link JSONArray}
+     * @return
      */
     public JSONArray toJSON() {
         return new JSONArray(get());
     }
 
     /**
-     * Accepts a JSONArray and puts all the information into a file.
+     * Generates a JSONArray from the current {@link controller.ProductManager}.
      *
      * @param arr
      */

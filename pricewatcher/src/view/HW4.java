@@ -152,9 +152,6 @@ public class HW4 extends HW3 {
     }
 
     /**
-     * This creates a thread to set the price when scraping a web-site for its
-     * given price. This is done to remove freezes in the UI when obtaining the
-     * price.
      *
      * @param product
      */
@@ -264,6 +261,7 @@ public class HW4 extends HW3 {
                 JOptionPane.OK_CANCEL_OPTION,
                 0,
                 new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+        //OK
         if (option == 0) {
             try {
                 Product generatedProduct = new Product(url.getText(), name.getText(), super.getCurrentDate(), 0.0, 0.0, 0.0, null, false);
@@ -275,6 +273,14 @@ public class HW4 extends HW3 {
             } catch (IllegalArgumentException e) {
                 JOptionPane.showMessageDialog(this, "Please re-enter correct information.");
             }
+        }
+        //Cancel 
+        if (option == 2) {
+
+        }
+        //Closed
+        if (option == -1) {
+
         }
         repaint();
     }
@@ -375,7 +381,7 @@ public class HW4 extends HW3 {
     }
 
     /**
-     * Opens the web with the given selected product inside of the JList.
+     *
      */
     @Override
     protected void openClickableActionWeb() {
@@ -397,11 +403,6 @@ public class HW4 extends HW3 {
         super.exitButtonClicked(event);
     }
 
-    /**
-     * Moves to the last of the cell within the {@link JList}.
-     *
-     * @param event
-     */
     @Override
     protected void moveDownButtonClicked(ActionEvent event) {
         int size = defaultListModel.getSize();
@@ -412,11 +413,6 @@ public class HW4 extends HW3 {
         }
     }
 
-    /**
-     * Moves to the top of cell within the {@link JList}.
-     *
-     * @param event
-     */
     @Override
     protected void moveUpButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {

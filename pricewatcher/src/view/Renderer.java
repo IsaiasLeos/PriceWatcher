@@ -6,16 +6,13 @@ import javax.swing.ListCellRenderer;
 import model.Product;
 
 /**
- * Visual renderer when selecting an item.
  *
  * @author Isaias Leos
  */
 public class Renderer extends ItemView implements ListCellRenderer<Product> {
 
-    private static final long serialVersionUID = 1L;
-
     /**
-     * This will render visuals when you selected an item inside of the JList.
+     * Renders what the selected index looks like
      *
      * @param list
      * @param value
@@ -27,7 +24,7 @@ public class Renderer extends ItemView implements ListCellRenderer<Product> {
     @Override
     public Component getListCellRendererComponent(JList<? extends Product> list,
             Product value, int index, boolean isSelected, boolean cellHasFocus) {
-
+        setProduct(value);
         if (isSelected) {
             setBackground(list.getSelectionBackground());
             setForeground(list.getSelectionForeground());

@@ -14,12 +14,6 @@ import java.util.Random;
 public class PriceFinder extends WebScrape {
 
     /**
-     * Default Constructor
-     */
-    public PriceFinder() {
-    }
-
-    /**
      * Scrapes a web-site and obtains the price of an item, given the URL.
      *
      * @param url
@@ -35,7 +29,6 @@ public class PriceFinder extends WebScrape {
      * @param medValue
      * @return random double between 300 - 400
      */
-    @Deprecated
     public double getPrice(Double medValue) {
         Random rand = new Random();
         double minValue = medValue - (medValue / 10);

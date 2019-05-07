@@ -10,15 +10,13 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 /**
- * This class creates a HTTP Connection and downloads the HTML file to obtain
- * the price with its respective web-site.
  *
  * @author Isaias Leos, Leslie Gomez
  */
 public class WebScrape {
 
     /**
-     * Default Constructor
+     * Default Constructor.
      */
     public WebScrape() {
     }
@@ -72,9 +70,8 @@ public class WebScrape {
     /**
      * Obtains the price of an item using RegEx. Contains $, Followed by Digits,
      * then a period or any number of digits before the period. After the period
-     * any number of digits
+     * any number of digits.
      *
-     * @param input the raw string
      * @return the price of an item that is from Ebay
      */
     private double scrapeEbay(String urlString) {
@@ -108,10 +105,9 @@ public class WebScrape {
     /**
      * Obtains the price of an item using RegEx. Contains $, Followed by Digits,
      * then a period or any number of digits before the period. After the period
-     * any number of digits
+     * any number of digits.
      *
-     * @param input the raw string
-     * @return the price of an item that is from Amazon
+     * @return
      */
     private double scrapeAmazon(String urlString) {
         HttpURLConnection con = null;
@@ -146,10 +142,9 @@ public class WebScrape {
     /**
      * Obtains the price of an item using RegEx. Contains $, Followed by Digits,
      * then a period or any number of digits before the period. After the period
-     * any number of digits
+     * any number of digits.
      *
-     * @param input the raw string
-     * @return the price of an item that is from Wal-Mart
+     * @return
      */
     private double scrapeWalmart(String urlString) {
         HttpURLConnection con = null;

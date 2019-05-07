@@ -51,6 +51,9 @@ public class Product {
         this.startingPrice = startingPrice;
         this.productIcon = getIcon();
         this.sound = sound;
+        if (this.url.contains("amazon")) {
+            urlSanitize();
+        }
     }
 
     /**
@@ -76,27 +79,26 @@ public class Product {
     }
 
     /**
-     * Returns a boolean that indicates if the current Product can play a sound.
      *
-     * @return {@link Boolean} flag
+     * @return
      */
     public boolean getSound() {
         return sound;
     }
 
     /**
-     * Sets a boolean that indicates if the current Product can play a sound.
+     * Returns a boolean that indicates if the current Product can play a sound.
      *
-     * @param playSound flag
+     * @param playSound
      */
     public void setSound(boolean playSound) {
         this.sound = playSound;
     }
 
     /**
-     * Returns the current URL of the Product.
+     * Sets a boolean that indicates if the current Product can play a sound.
      *
-     * @return {@link String} URL
+     * @return returns the current URL of the item being watched.
      */
     public String getURL() {
         return url;
@@ -105,16 +107,16 @@ public class Product {
     /**
      * Replaces the current URL of the item being watched.
      *
-     * @param url {@link String} URL
+     * @param url the name of the URL that will be replacing the current item
+     * name.
      */
     public void setURL(String url) {
         this.url = url;
     }
 
     /**
-     * Returns the name of the current item.
      *
-     * @return {@link String} Name
+     * @return returns the name of the current item.
      */
     public String getName() {
         return name;
@@ -123,16 +125,15 @@ public class Product {
     /**
      * Replaces the current Name of the item being watched.
      *
-     * @param name {@link String}
+     * @param name the name of the item that will be replacing the current item.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * Returns the price of the current item.
      *
-     * @return {@link Double} Current Price
+     * @return returns the price of the current item.
      */
     public double getCurrentPrice() {
         return currentPrice;
@@ -149,9 +150,8 @@ public class Product {
     }
 
     /**
-     * Returns the current date of when the product was added.
      *
-     * @return {@link String}
+     * @return the current date of when the product was added
      */
     public String getDate() {
         return date;
@@ -167,9 +167,8 @@ public class Product {
     }
 
     /**
-     * Return the value of change between the initial price and the new price.
      *
-     * @return {@link Double} Change
+     * @return the value of change between the initial price and the new price.
      */
     public double getChange() {
         return change;
@@ -187,7 +186,7 @@ public class Product {
     /**
      * Get the initial price of a product.
      *
-     * @return {@link Double} Starting Price
+     * @return
      */
     public double getStartingPrice() {
         return startingPrice;
@@ -203,12 +202,8 @@ public class Product {
     }
 
     /**
-     * Returns the current icon that will Render with this specific Product.
      *
-     * See {@link view.ItemView} for more information on what image will be
-     * rendering.
-     *
-     * @return {@link Image}
+     * @return
      */
     public Image getIcon() {
         if (productIcon == null) {
@@ -218,7 +213,6 @@ public class Product {
     }
 
     /**
-     * Sets the icon that will Render with this specific Product
      *
      * @param icon
      */
@@ -244,7 +238,8 @@ public class Product {
     }
 
     /**
-     * Will remove unwanted information from an Amazon Link.
+     * Removes unwanted information from an Amazon Link. Enabling web scraping
+     * to perform better.
      */
     private void urlSanitize() {
         String[] sanitize = url.split("/");

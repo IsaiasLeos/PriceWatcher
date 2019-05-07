@@ -219,7 +219,7 @@ public class HW3 extends JFrame {
     }
 
     /**
-     * Creates a default product that will be added to the JList.
+     *
      */
     @SuppressWarnings("unchecked")
     protected void createDefaultProduct() {
@@ -801,7 +801,7 @@ public class HW3 extends JFrame {
      * Create a button with the given label.
      *
      * @param label name of the resource (image)
-     * @param tooltip
+     * @param enabled
      * @return a button
      */
     protected JButton createJButton(String label, String tooltip) {
