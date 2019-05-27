@@ -6,16 +6,13 @@
 package storage;
 
 import controller.ProductManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class is in charge of maintaining storing information and reading it
@@ -26,7 +23,6 @@ import org.json.JSONTokener;
 public class StorageManager extends ProductManager {
 
     /**
-     *
      * @return
      */
     public JSONArray toJSON() {
@@ -34,7 +30,7 @@ public class StorageManager extends ProductManager {
     }
 
     /**
-     * Generates a JSONArray from the current {@link controller.ProductManager}.
+     * Generates a JSONArray from the current {@link ProductManager}.
      *
      * @param arr
      */
@@ -48,7 +44,7 @@ public class StorageManager extends ProductManager {
 
     /**
      * Reads a JSON file and inputs all information into a
-     * {@link controller.ProductManager}.
+     * {@link ProductManager}.
      *
      * @throws FileNotFoundException
      */

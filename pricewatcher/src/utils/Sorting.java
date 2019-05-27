@@ -5,12 +5,13 @@
  */
 package utils;
 
+import model.Product;
+import storage.StorageManager;
+
+import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.DefaultListModel;
-import model.Product;
-import storage.StorageManager;
 
 /**
  * This class is in charge of sorting and filters everything from
@@ -20,9 +21,9 @@ import storage.StorageManager;
  */
 public class Sorting {
 
+    private boolean isFilter = false;
     private DefaultListModel defaultListModel;
     private StorageManager storageManager;
-    public boolean isFilter = false;
 
     /**
      * Default Constructor.
@@ -35,94 +36,25 @@ public class Sorting {
         this.storageManager = storageManager;
     }
 
-    /**
-     * Sorts the JList and {@link controller.ProductManager} from oldest date.
-     */
-    public void sortOld() {
+    public void sortBy(int sortCode) {
         List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> product2.getDate().compareTo(product1.getDate()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} from newest date.
-     */
-    public void sortNew() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into ascending
-     * order.
-     */
-    public void sortNameAscending() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> product2.getName().compareTo(product1.getName()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into Descending
-     * order.
-     */
-    public void sortNameDescending() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into highest
-     * priced.
-     */
-    public void sortHigh() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into lowest priced.
-     */
-    public void sortLow() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into highest price
-     * change.
-     */
-    public void sortChangeHigh() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-    }
-
-    /**
-     * Sorts the JList and {@link controller.ProductManager} into lowest price
-     * change.
-     */
-    public void sortChangeLow() {
-        List<Product> products = storageManager.get();
-        Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
+        if (sortCode == 0) {
+            Collections.sort(products, (Product product2, Product product1) -> product2.getDate().compareTo(product1.getDate()));
+        } else if (sortCode == 1) {
+            Collections.sort(products, (Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
+        } else if (sortCode == 2) {
+            Collections.sort(products, (Product product2, Product product1) -> product2.getName().compareTo(product1.getName()));
+        } else if (sortCode == 3) {
+            Collections.sort(products, (Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
+        } else if (sortCode == 4) {
+            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
+        } else if (sortCode == 5) {
+            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
+        } else if (sortCode == 6) {
+            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
+        } else if (sortCode == 7) {
+            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
+        }
         storageManager.set(products);
         defaultListModel.removeAllElements();
         storageManager.get().forEach((element) -> defaultListModel.addElement(element));
@@ -139,24 +71,6 @@ public class Sorting {
         }
         List<Product> products = storageManager.get();
         products.removeIf(s -> !s.getURL().contains(filter));
-        storageManager.set(products);
-        defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
-        isFilter = true;
-    }
-
-    /**
-     * Filters the JList and {@link controller.ProductManager} given the name of
-     * the product.
-     *
-     * @param filter
-     */
-    public void filterName(String filter) {
-        if (isFilter) {
-            removeFilter();
-        }
-        List<Product> products = storageManager.get();
-        products.removeIf(s -> !s.getName().contains(filter));
         storageManager.set(products);
         defaultListModel.removeAllElements();
         storageManager.get().forEach((element) -> defaultListModel.addElement(element));

@@ -12,7 +12,7 @@ import model.Product;
 public class Renderer extends ItemView implements ListCellRenderer<Product> {
 
     /**
-     * Renders what the selected index looks like
+     * Renders what the selected index looks like.
      *
      * @param list
      * @param value

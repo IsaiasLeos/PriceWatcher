@@ -1,11 +1,11 @@
 package model;
 
-import java.awt.Image;
-import java.net.URL;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import javax.imageio.ImageIO;
+import java.net.URL;
 
 /**
  * This class holds information about the current product and changes done to
@@ -71,7 +71,7 @@ public class Product {
      * This method computes the percentage difference between two numbers.
      *
      * @param initialPrice initial price of the product
-     * @param newPrice the current price of the product
+     * @param newPrice     the current price of the product
      * @return the difference shown as a percentage
      */
     private double calcChange(double newPrice, double initialPrice) {
@@ -79,7 +79,6 @@ public class Product {
     }
 
     /**
-     *
      * @return
      */
     public boolean getSound() {
@@ -108,14 +107,13 @@ public class Product {
      * Replaces the current URL of the item being watched.
      *
      * @param url the name of the URL that will be replacing the current item
-     * name.
+     *            name.
      */
     public void setURL(String url) {
         this.url = url;
     }
 
     /**
-     *
      * @return returns the name of the current item.
      */
     public String getName() {
@@ -132,7 +130,6 @@ public class Product {
     }
 
     /**
-     *
      * @return returns the price of the current item.
      */
     public double getCurrentPrice() {
@@ -143,14 +140,13 @@ public class Product {
      * Replaces the current Price of the item being watched.
      *
      * @param price the price that will be replacing the current price of the
-     * item.
+     *              item.
      */
     public void setCurrentPrice(double price) {
         this.currentPrice = price;
     }
 
     /**
-     *
      * @return the current date of when the product was added
      */
     public String getDate() {
@@ -167,7 +163,6 @@ public class Product {
     }
 
     /**
-     *
      * @return the value of change between the initial price and the new price.
      */
     public double getChange() {
@@ -202,7 +197,6 @@ public class Product {
     }
 
     /**
-     *
      * @return
      */
     public Image getIcon() {
@@ -213,7 +207,6 @@ public class Product {
     }
 
     /**
-     *
      * @param icon
      */
     public void setIcon(String icon) {
@@ -226,7 +219,6 @@ public class Product {
      * @param file
      * @return
      */
-    @SuppressWarnings("CallToPrintStackTrace")
     public Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource("/resources/"), file);

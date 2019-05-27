@@ -3,46 +3,18 @@ package view;
 import controller.PriceFinder;
 import controller.ProductManager;
 import model.Product;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import java.util.Objects;
 
 /**
  * A dialog for tracking the price of an item.
@@ -52,28 +24,25 @@ import javax.swing.SwingUtilities;
 @SuppressWarnings("serial")
 public class HW3 extends JFrame {
 
-    protected JLabel msgBar = new JLabel("");
-    private JList viewListCell;
+    private JLabel msgBar = new JLabel("");
+    private JList<? extends Object> viewListCell;
     private DefaultListModel<Product> defaultListModel;
     private JPopupMenu popupMenu;
-    private Renderer renderer;
-    private ProductManager originalProductManager;
     private PriceFinder webPrice;
 
     /**
      * Create a Dialog of Default Size (600,400).
      */
-    public HW3() {
+    HW3() {
         this(new Dimension(600, 400));
     }
 
     /**
      * Create a new dialog of the given Dimensions (600,400).
      *
-     * @param dim
+     * @param dim dimension of the project
      */
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public HW3(Dimension dim) {
+    private HW3(Dimension dim) {
         super("Price Watcher");
         createDefaultProduct();
         setLayout(new BorderLayout());
@@ -88,9 +57,12 @@ public class HW3 extends JFrame {
         setVisible(true);
     }
 
+    public static void main(String[] args) {
+        HW3 main = new HW3();
+    }
+
     /**
      * Create and Configure the GUI.
-     *
      */
     protected void createUI() {
         JPanel controlPanel = createControlPanel();
@@ -115,7 +87,7 @@ public class HW3 extends JFrame {
      * Create a control panel consisting of a Tool Bar, Menu Bar, and a Pop-up
      * Menu.
      */
-    protected JPanel createControlPanel() {
+    private JPanel createControlPanel() {
         createJPopupMenu();
         createJMenuBar();
         add(createJToolBar("Toolbar"), BorderLayout.NORTH);
@@ -125,15 +97,16 @@ public class HW3 extends JFrame {
     /**
      * Show briefly the given string in the message bar.
      *
-     * @param msg
-     * @param time
+     * @param msg  msg to display
+     * @param time time the message will appear
      */
-    protected void showMessage(String msg, int time) {
+    private void showMessage(String msg, int time) {
         msgBar.setText(msg);
         new Thread(() -> {
             try {
-                Thread.sleep(4 * 1000);
+                Thread.sleep(time * 1000);
             } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             if (msg.equals(msgBar.getText())) {
                 SwingUtilities.invokeLater(() -> msgBar.setText(" "));
@@ -145,7 +118,7 @@ public class HW3 extends JFrame {
      * Listen to when the mouse is either right clicking or left clicking on the
      * JList.
      *
-     * @return
+     * @return mouse listener
      */
     protected MouseAdapter mouseListener() {
         return new MouseAdapter() {
@@ -172,7 +145,7 @@ public class HW3 extends JFrame {
      * Listen to when the mouse is moving or clicking on certain areas of the
      * JList.
      *
-     * @return
+     * @return mouse motion listener
      */
     protected MouseMotionListener mouseMotionListener() {
         return new MouseMotionListener() {
@@ -187,43 +160,39 @@ public class HW3 extends JFrame {
                         && e.getY() < 32 + (viewListCell.getSelectedIndex() * 160)
                         && e.getY() > 12 + (viewListCell.getSelectedIndex() * 160)
                         && viewListCell.getSelectedIndex() != -1) {
-                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("ebay")) {
+                    String url = defaultListModel.get(viewListCell.getSelectedIndex()).getURL();
+                    if (url.contains("ebay")) {
                         defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("ebay.png");
                     }
-                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("amazon")) {
+                    if (url.contains("amazon")) {
                         defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("amazon.png");
                     }
-                    if (defaultListModel.get(viewListCell.getSelectedIndex()).getURL().contains("walmart")) {
+                    if (url.contains("walmart")) {
                         defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("walmart.png");
                     }
-                    repaint();
                 } else if (viewListCell.getSelectedIndex() > -1) {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setIcon("webbrowser.png");
-                    repaint();
                 }
+                repaint();
             }
         };
 
     }
 
     /**
-     * Create a {@link model.Product} given the parameters.
+     * Create a {@link Product} given the parameters.
      *
-     * @param itemURL the URL that links to the item
-     * @param itemName the name of the product
+     * @param itemURL   the URL that links to the item
+     * @param itemName  the name of the product
      * @param itemPrice the initial price of the item
-     * @return
+     * @return a product
      */
-    protected Product createProduct(String itemURL, String itemName, double itemPrice) {
+    private Product createProduct(String itemURL, String itemName, double itemPrice) {
         return new Product(itemURL, itemName, getCurrentDate(), itemPrice, 0.0, itemPrice, null, false);
     }
 
-    /**
-     *
-     */
-    @SuppressWarnings("unchecked")
-    protected void createDefaultProduct() {
-        originalProductManager = new ProductManager();
+    private void createDefaultProduct() {
+        ProductManager originalProductManager = new ProductManager();
         String productURL = "https://www.amazon.com/Nintendo-Console-Resolution-Surround-Customize/dp/B07M5ZQSKV";
         String productName = "Nintendo Switch";
         double productInitialPrice = 359.99;
@@ -255,7 +224,6 @@ public class HW3 extends JFrame {
      *
      * @param event
      */
-    @SuppressWarnings("deprecation")
     protected void singleRefreshButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
             defaultListModel.get(viewListCell.getSelectedIndex()).checkPrice(webPrice.getPrice(defaultListModel.get(viewListCell.getSelectedIndex()).getCurrentPrice()));
@@ -268,7 +236,7 @@ public class HW3 extends JFrame {
     }
 
     /**
-     * Adds a {@link model.Product} to the current {@link JList}. There must be
+     * Adds a {@link Product} to the current {@link JList}. There must be
      * a given name, URL, and price of the product. Date will be given to
      * whatever the given date is.
      *
@@ -279,30 +247,25 @@ public class HW3 extends JFrame {
         JTextField url = new JTextField();
         JTextField price = new JTextField();
         Object[] message = {
-            "Product Name:", name,
-            "Product URL:", url,
-            "Product Price:", price
+                "Product Name:", name,
+                "Product URL:", url,
+                "Product Price:", price
         };
-        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+        int option = JOptionPane.showConfirmDialog(this,
+                message,
+                "Add",
+                JOptionPane.OK_CANCEL_OPTION,
+                0
+                , new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
         //OK
         if (option == 0) {
             try {
                 Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()));
                 defaultListModel.addElement(generatedProduct);
                 showMessage("Product Successfully Added", 4);
-            } catch (NumberFormatException e) {
-                showMessage("Please re-enter correct information.", 4);
             } catch (IllegalArgumentException e) {
                 showMessage("Please re-enter correct information.", 4);
             }
-        }
-        //Cancel 
-        if (option == 2) {
-
-        }
-        //Closed
-        if (option == -1) {
-
         }
     }
 
@@ -310,16 +273,15 @@ public class HW3 extends JFrame {
      * Gets the current date.
      *
      * @return current date in MM/dd/yyyy format
-     *
      */
-    protected String getCurrentDate() {
+    public String getCurrentDate() {
         SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
     }
 
     /**
-     * Searches for the {@link model.Product} Name and displays product that
+     * Searches for the {@link Product} Name and displays product that
      * contain the same letters while ignoring capitalization.
      *
      * @param event
@@ -327,17 +289,9 @@ public class HW3 extends JFrame {
     protected void searchButtonClicked(ActionEvent event) {
         JTextField search = new JTextField();
         Object[] message = {
-            "Search:", search
+                "Search:", search
         };
-        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
-        if (option == 0) {
-            for (int i = 0; i < defaultListModel.getSize(); i++) {
-                if (defaultListModel.get(i).getName().toLowerCase().contains(search.getText().toLowerCase())) {
-
-                }
-            }
-            repaint();
-        }
+        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
     }
 
     /**
@@ -359,7 +313,7 @@ public class HW3 extends JFrame {
     protected void moveDownButtonClicked(ActionEvent event) {
         int size = defaultListModel.getSize();
         if (size > -1) {
-            viewListCell.setSelectedIndex(size);
+            viewListCell.setSelectedIndex(size - 1);
         }
     }
 
@@ -391,11 +345,11 @@ public class HW3 extends JFrame {
             JTextField url = new JTextField(generatedProduct.getURL(), 5);
             JTextField price = new JTextField("" + (generatedProduct.getCurrentPrice()));
             Object[] message = {
-                "Product Name:", name,
-                "Product URL:", url,
-                "Product Price:", price
+                    "Product Name:", name,
+                    "Product URL:", url,
+                    "Product Price:", price
             };
-            int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.PLAIN_MESSAGE, 0, new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+            int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
             if (option == 0) {
                 try {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setName(name.getText());
@@ -408,14 +362,6 @@ public class HW3 extends JFrame {
                     showMessage("Please re-enter correct information.", 4);
                 }
             }
-            //Close Button
-            if (option == -1) {
-
-            }
-            //Cancel
-            if (option == 2) {
-
-            }
         } else {
             showMessage("Not Selecting an Item", 4);
         }
@@ -423,9 +369,7 @@ public class HW3 extends JFrame {
 
     /**
      * Redirects the user to the {@link URI} of the currently selected cell or
-     * {@link model.Product}
-     *
-     * @param selectedIndex
+     * {@link Product}
      */
     protected void openClickableActionWeb() {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -444,7 +388,7 @@ public class HW3 extends JFrame {
      *
      * @param event
      */
-    protected void aboutButtonClicked(ActionEvent event) {
+    public void aboutButtonClicked(ActionEvent event) {
         JLabel label = new JLabel("<html>"
                 + "<center>"
                 + "<strong>PriceWatcher v3.6</strong>"
@@ -474,102 +418,53 @@ public class HW3 extends JFrame {
     }
 
     /**
-     *
-     * @param event
-     */
-    protected void sortOld(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortNew(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortNameAscending(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortNameDescending(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortHigh(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortLow(ActionEvent event) {
-    }
-
-    /**
-     *
-     * @param event
-     */
-    protected void sortChange(ActionEvent event) {
-    }
-
-    /**
      * Creates a {@link JToolBar} with the given
-     * buttons.<li>{@link #refreshButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #addButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #searchButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #moveUpButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #moveDownButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #singleRefreshButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #openWeb(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #deleteButtonClicked(java.awt.event.ActionEvent)}</li>
-     * <li>{@link #editButtonClicked(java.awt.event.ActionEvent)}</li>
+     * buttons.<li>{@link #refreshButtonClicked(ActionEvent)}</li>
+     * <li>{@link #addButtonClicked(ActionEvent)}</li>
+     * <li>{@link #searchButtonClicked(ActionEvent)}</li>
+     * <li>{@link #moveUpButtonClicked(ActionEvent)}</li>
+     * <li>{@link #moveDownButtonClicked(ActionEvent)}</li>
+     * <li>{@link #singleRefreshButtonClicked(ActionEvent)}</li>
+     * <li>{@link #openClickableActionWeb()}</li>
+     * <li>{@link #deleteButtonClicked(ActionEvent)}</li>
+     * <li>{@link #editButtonClicked(ActionEvent)}</li>
      *
-     * @param title
+     * @param title name of the toolbar
      * @return JToolBar
      */
     protected JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
         JButton checkmark = createJButton("checkmark.png", "Check Item Prices");
-        checkmark.addActionListener((event) -> this.refreshButtonClicked(event));
+        checkmark.addActionListener(this::refreshButtonClicked);
         toolBar.add(checkmark);
         JButton add = createJButton("plus.png", "Add Product");
-        add.addActionListener((event) -> this.addButtonClicked(event));
+        add.addActionListener(this::addButtonClicked);
         toolBar.add(add);
         JButton search = createJButton("search.png", "Search for a Item");
-        search.addActionListener((event) -> this.searchButtonClicked(event));
+        search.addActionListener(this::searchButtonClicked);
         toolBar.add(search);
         JButton upButton = createJButton("up.png", "Move to First Item");
-        upButton.addActionListener((event) -> this.moveUpButtonClicked(event));
+        upButton.addActionListener(this::moveUpButtonClicked);
         toolBar.add(upButton);
         JButton downButton = createJButton("down.png", "Move to Last Item");
-        downButton.addActionListener((event) -> this.moveDownButtonClicked(event));
+        downButton.addActionListener(this::moveDownButtonClicked);
         toolBar.add(downButton);
         toolBar.addSeparator();
         JButton singleRefresh = createJButton("refresh.png", "Refresh Selected Item");
-        singleRefresh.addActionListener((event) -> this.singleRefreshButtonClicked(event));
+        singleRefresh.addActionListener(this::singleRefreshButtonClicked);
         toolBar.add(singleRefresh);
         JButton openLink = createJButton("webbrowser.png", "Open in Browser");
         openLink.addActionListener((event) -> this.openClickableActionWeb());
         toolBar.add(openLink);
         JButton delete = createJButton("delete.png", "Delete Selected Item");
-        delete.addActionListener((event) -> this.deleteButtonClicked(event));
+        delete.addActionListener(this::deleteButtonClicked);
         toolBar.add(delete);
         JButton edit = createJButton("edit.png", "Edit Selected Item");
-        edit.addActionListener((event) -> this.editButtonClicked(event));
+        edit.addActionListener(this::editButtonClicked);
         toolBar.add(edit);
         toolBar.addSeparator();
         JButton about = createJButton("about.png", "App Information");
-        about.addActionListener((event) -> this.aboutButtonClicked(event));
+        about.addActionListener(this::aboutButtonClicked);
         toolBar.add(about);
         return toolBar;
     }
@@ -577,24 +472,22 @@ public class HW3 extends JFrame {
     /**
      * Creates a {@link JPopupMenu} with the given actions. To be used on a
      * JList area only.
-     * <li>{@link #singleRefreshButtonClicked(java.awt.event.ActionEvent) }</li>
-     * <li>{@link #openWeb(java.awt.event.ActionEvent) }</li>
-     * <li>{@link #editButtonClicked(java.awt.event.ActionEvent) }</li>
-     * <li>{@link #deleteButtonClicked(java.awt.event.ActionEvent) }</li>
-     * <li>{@link #copyToClipboard(java.lang.String) }</li>
-     *
-     * @return a pop-up menu of items
+     * <li>{@link #singleRefreshButtonClicked(ActionEvent) }</li>
+     * <li>{@link #openClickableActionWeb()}</li>
+     * <li>{@link #editButtonClicked(ActionEvent) }</li>
+     * <li>{@link #deleteButtonClicked(ActionEvent) }</li>
+     * <li>{@link #toClipboard(int)}</li>
      */
     private void createJPopupMenu() {
         JPopupMenu generatedPopupMenu = new JPopupMenu();
-        JMenuItem price = createJMenutItem("Price", "checkmark.png", "Check Prices");
-        price.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        JMenuItem view = createJMenutItem("View", "webbrowser.png", "View Item in Browser");
+        JMenuItem price = createJMenuItem("Price", "checkmark.png", "Check Prices");
+        price.addActionListener(this::singleRefreshButtonClicked);
+        JMenuItem view = createJMenuItem("View", "webbrowser.png", "View Item in Browser");
         view.addActionListener((event) -> this.openClickableActionWeb());
-        JMenuItem edit = createJMenutItem("Edit", "edit.png", "Edit selected Item");
-        edit.addActionListener((event) -> this.editButtonClicked(event));
-        JMenuItem remove = createJMenutItem("Remove", "delete.png", "Delete Selected Item");
-        remove.addActionListener((event) -> this.deleteButtonClicked(event));
+        JMenuItem edit = createJMenuItem("Edit", "edit.png", "Edit selected Item");
+        edit.addActionListener(this::editButtonClicked);
+        JMenuItem remove = createJMenuItem("Remove", "delete.png", "Delete Selected Item");
+        remove.addActionListener(this::deleteButtonClicked);
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.toClipboard(1));
         JMenuItem curl = new JMenuItem("Copy URL");
@@ -615,10 +508,10 @@ public class HW3 extends JFrame {
     /**
      * Creates a {@link DefaultListModel} of the {@link ProductManager}.
      *
-     * @param originalProductManager
-     * @return
+     * @param originalProductManager manages and holds products
+     * @return a list model
      */
-    protected DefaultListModel createListModel(ProductManager originalProductManager) {
+    private DefaultListModel createListModel(ProductManager originalProductManager) {
         DefaultListModel generatedListModel = new DefaultListModel<>();
         originalProductManager.get().forEach(generatedListModel::addElement);
         return generatedListModel;
@@ -627,18 +520,18 @@ public class HW3 extends JFrame {
     /**
      * Creates a {@link JList} from a {@link DefaultListModel}.
      *
-     * @return
+     * @return populated jlist
      */
     protected JList createJList(DefaultListModel defaultListModel) {
-        JList generatedJList = new JList<>(defaultListModel);
-        renderer = new Renderer();
+        JList<Product> generatedJList = new JList<Product>(defaultListModel);
+        Renderer renderer = new Renderer();
         generatedJList.setCellRenderer(renderer);
         return generatedJList;
     }
 
     /**
      * Creates a {@link JMenuBar} that contains the creator information, actions
-     * for {@link model.Product} and sorting for the JList.
+     * for {@link Product} and sorting for the JList.
      */
     private void createJMenuBar() {
         JMenuBar fileMenuBar = new JMenuBar();
@@ -646,61 +539,39 @@ public class HW3 extends JFrame {
         JMenu editMenu = new JMenu("Item");
         JMenu sortMenu = new JMenu("Sort");
         JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
-        about.addActionListener((event) -> this.aboutButtonClicked(event));
+        about.addActionListener(this::aboutButtonClicked);
         appMenu.add(about);
         JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
-        exit.addActionListener((event) -> this.exitButtonClicked(event));
-        exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "plus.png")));
+        exit.addActionListener(this::exitButtonClicked);
+        exit.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
         appMenu.add(exit);
         JMenuItem check = createJMenuItem("Check Prices", "Check Item Prices", "checkmark.png", KeyEvent.VK_C, ActionEvent.ALT_MASK);
-        check.addActionListener((event) -> this.refreshButtonClicked(event));
+        check.addActionListener(this::refreshButtonClicked);
         editMenu.add(check);
         JMenuItem add = createJMenuItem("Add", "Add a Product", "plus.png", KeyEvent.VK_A, ActionEvent.ALT_MASK);
-        add.addActionListener((event) -> this.addButtonClicked(event));
+        add.addActionListener(this::addButtonClicked);
         editMenu.add(add);
         editMenu.add(new JSeparator());
         JMenuItem search = createJMenuItem("Search", "Search for an Item", "search.png", KeyEvent.VK_S, ActionEvent.ALT_MASK);
-        search.addActionListener((event) -> this.searchButtonClicked(event));
-        search.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "search.png")));
+        search.addActionListener(this::searchButtonClicked);
+        search.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "search.png"))));
         editMenu.add(search);
         JMenuItem forward = createJMenuItem("Select First", "Move to First Item", "up.png", KeyEvent.VK_UP, ActionEvent.ALT_MASK);
-        forward.addActionListener((event) -> this.moveUpButtonClicked(event));
+        forward.addActionListener(this::moveUpButtonClicked);
         editMenu.add(forward);
         JMenuItem backward = createJMenuItem("Select Last", "Move to Last Item", "down.png", KeyEvent.VK_DOWN, ActionEvent.ALT_MASK);
-        backward.addActionListener((event) -> this.moveDownButtonClicked(event));
-        backward.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + "down.png")));
+        backward.addActionListener(this::moveDownButtonClicked);
+        backward.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "down.png"))));
         editMenu.add(backward);
-        JMenuItem oldest = new JRadioButtonMenuItem("Oldest");
-        oldest.addActionListener((event) -> this.sortOld(event));
-        sortMenu.add(oldest);
-        JMenuItem newest = new JRadioButtonMenuItem("Newest");
-        newest.addActionListener((event) -> this.sortNew(event));
-        sortMenu.add(newest);
-        sortMenu.addSeparator();
-        JMenuItem ascend = new JRadioButtonMenuItem("Ascending Order");
-        ascend.addActionListener((event) -> this.sortNameAscending(event));
-        sortMenu.add(ascend);
-        JMenuItem descend = new JRadioButtonMenuItem("Descending Order");
-        descend.addActionListener((event) -> this.sortNameDescending(event));
-        sortMenu.add(descend);
-        sortMenu.addSeparator();
-        JMenuItem low = new JRadioButtonMenuItem("Lowest Price ($)");
-        low.addActionListener((event) -> this.sortLow(event));
-        sortMenu.add(low);
-        JMenuItem high = new JRadioButtonMenuItem("Highest Price ($)");
-        high.addActionListener((event) -> this.sortHigh(event));
-        sortMenu.add(high);
-        JMenuItem priceChange = new JRadioButtonMenuItem("Price Change (%)");
-        priceChange.addActionListener((event) -> this.sortChange(event));
         JMenu generatedNestedMenu = new JMenu("Selected");
-        JMenuItem priceNested = createJMenutItem("Price", "checkmark.png", "Check Prices");
-        priceNested.addActionListener((event) -> this.singleRefreshButtonClicked(event));
-        JMenuItem viewNested = createJMenutItem("View", "webbrowser.png", "View Item on Browser");
+        JMenuItem priceNested = createJMenuItem("Price", "checkmark.png", "Check Prices");
+        priceNested.addActionListener(this::singleRefreshButtonClicked);
+        JMenuItem viewNested = createJMenuItem("View", "webbrowser.png", "View Item on Browser");
         viewNested.addActionListener((event) -> this.openClickableActionWeb());
-        JMenuItem editNested = createJMenutItem("Edit", "edit.png", "Edit selected Item");
-        editNested.addActionListener((event) -> this.editButtonClicked(event));
-        JMenuItem removeNested = createJMenutItem("Remove", "delete.png", "Delete selected Item");
-        removeNested.addActionListener((event) -> this.deleteButtonClicked(event));
+        JMenuItem editNested = createJMenuItem("Edit", "edit.png", "Edit selected Item");
+        editNested.addActionListener(this::editButtonClicked);
+        JMenuItem removeNested = createJMenuItem("Remove", "delete.png", "Delete selected Item");
+        removeNested.addActionListener(this::deleteButtonClicked);
         JMenuItem cname = new JMenuItem("Copy Name");
         cname.addActionListener((event) -> this.toClipboard(1));
         JMenuItem curl = new JMenuItem("Copy URL");
@@ -716,7 +587,6 @@ public class HW3 extends JFrame {
         generatedNestedMenu.add(curl);
         generatedNestedMenu.add(citem);
         editMenu.add(generatedNestedMenu);
-        sortMenu.add(priceChange);
         fileMenuBar.add(appMenu);
         fileMenuBar.add(editMenu);
         fileMenuBar.add(sortMenu);
@@ -724,10 +594,10 @@ public class HW3 extends JFrame {
     }
 
     /**
-     * Copies information inside of the {@link Jlist} to the System Clipboard.
+     * Copies information inside of the {@link JList} to the System Clipboard.
      *
      * @param option name will given name of product, product url, and whole
-     * product information.
+     *               product information.
      */
     protected void toClipboard(int option) {
         if (viewListCell.getSelectedIndex() > -1) {
@@ -744,13 +614,11 @@ public class HW3 extends JFrame {
                     Product toClipboard = defaultListModel.get(viewListCell.getSelectedIndex());
                     selection = new StringSelection(
                             "Name:  " + toClipboard.getName() + "\n"
-                            + "URL:  " + toClipboard.getURL() + "\n"
-                            + "Price:  " + toClipboard.getCurrentPrice() + "\n"
-                            + "Change:  " + toClipboard.getChange() + "\n"
-                            + "Date Added:  " + toClipboard.getDate() + "\n"
+                                    + "URL:  " + toClipboard.getURL() + "\n"
+                                    + "Price:  " + toClipboard.getCurrentPrice() + "\n"
+                                    + "Change:  " + toClipboard.getChange() + "\n"
+                                    + "Date Added:  " + toClipboard.getDate() + "\n"
                     );
-                    break;
-                default:
                     break;
             }
             clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -765,16 +633,16 @@ public class HW3 extends JFrame {
      * or ALT is being pressed.
      *
      * @param label name of the item
-     * @param key {@link KeyEvent}
-     * @param mask modifier
-     * @return
+     * @param key   {@link KeyEvent}
+     * @param mask  modifier
+     * @return jmenu item
      */
     protected JMenuItem createJMenuItem(String label, String tooltip, String itemName, int key, int mask) {
         JMenuItem menuItem = new JMenuItem(label);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(key, mask));
         menuItem.setMnemonic(mask);
         menuItem.setRolloverEnabled(true);
-        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + itemName)));
+        menuItem.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + itemName))));
         menuItem.setToolTipText(tooltip);
         return menuItem;
     }
@@ -783,15 +651,15 @@ public class HW3 extends JFrame {
      * Creates a {@link JMenuItem} with the given parameter of a label.Used to
      * create a JMenuBar.It sets RollOverEnable to true.
      *
-     * @param label
-     * @param imageName
-     * @param tooltip
+     * @param label     name of item
+     * @param imageName visual
+     * @param tooltip   hover over text
      * @return the JMenuItem
      */
-    protected JMenuItem createJMenutItem(String label, String imageName, String tooltip) {
+    protected JMenuItem createJMenuItem(String label, String imageName, String tooltip) {
         JMenuItem menuItem = new JMenuItem(label);
         menuItem.setRolloverEnabled(true);
-        menuItem.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + imageName)));
+        menuItem.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + imageName))));
         menuItem.setToolTipText(tooltip);
         return menuItem;
 
@@ -800,21 +668,17 @@ public class HW3 extends JFrame {
     /**
      * Create a button with the given label.
      *
-     * @param label name of the resource (image)
-     * @param enabled
+     * @param label   name of the resource (image)
+     * @param tooltip hover over text
      * @return a button
      */
     protected JButton createJButton(String label, String tooltip) {
         JButton button = new JButton();
-        button.setIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/" + label)));
+        button.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + label))));
         button.setFocusPainted(true);
         button.setRolloverEnabled(true);
         button.setToolTipText(tooltip);
         return button;
-    }
-
-    public static void main(String[] args) {
-        HW3 main = new HW3();
     }
 
 }

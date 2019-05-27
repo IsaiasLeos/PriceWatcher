@@ -1,8 +1,9 @@
 package controller;
 
+import model.Product;
+
 import java.util.ArrayList;
 import java.util.List;
-import model.Product;
 
 public class ProductManager {
 
@@ -16,7 +17,7 @@ public class ProductManager {
     }
 
     /**
-     * Adds a {@link model.Product} to the Product List
+     * Adds a {@link model.Product} to the Product List.
      *
      * @param product
      */
@@ -25,7 +26,7 @@ public class ProductManager {
     }
 
     /**
-     * Deletes a {@link model.Product} from the Product List
+     * Deletes a {@link model.Product} from the Product List.
      *
      * @param product
      */
@@ -34,7 +35,6 @@ public class ProductManager {
     }
 
     /**
-     *
      * @return the list of products
      */
     public List<Product> get() {
@@ -43,6 +43,7 @@ public class ProductManager {
 
     /**
      * Creates a Product and adds it to the existing ArrayList.
+     *
      * @param name
      * @param date
      * @param currentPrice
@@ -50,7 +51,7 @@ public class ProductManager {
      * @param URL
      * @param change
      */
-    public void create(String name, String date, double currentPrice, double startingPrice, String URL, double change) {
+    protected void create(String name, String date, double currentPrice, double startingPrice, String URL, double change) {
         Product generated = new Product();
         generated.setName(name);
         generated.setDate(date);
