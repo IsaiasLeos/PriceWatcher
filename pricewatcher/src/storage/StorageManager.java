@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 public class StorageManager extends ProductManager {
 
     /**
-     * @return
+     * @return generated jsonarray obtained from product manager
      */
     public JSONArray toJSON() {
         return new JSONArray(get());
@@ -32,7 +32,7 @@ public class StorageManager extends ProductManager {
     /**
      * Generates a JSONArray from the current {@link ProductManager}.
      *
-     * @param arr
+     * @param arr json array
      */
     public void toStorage(JSONArray arr) {
         try (FileWriter file = new FileWriter(new File("src/resources/products.json"))) {
@@ -46,7 +46,7 @@ public class StorageManager extends ProductManager {
      * Reads a JSON file and inputs all information into a
      * {@link ProductManager}.
      *
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException couldn't find the json file
      */
     public void fromJSON() throws FileNotFoundException {
         JSONTokener tokener = new JSONTokener(new FileInputStream(new File("src/resources/products.json")));

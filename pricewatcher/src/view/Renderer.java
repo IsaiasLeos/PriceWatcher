@@ -14,12 +14,12 @@ public class Renderer extends ItemView implements ListCellRenderer<Product> {
     /**
      * Renders what the selected index looks like.
      *
-     * @param list
-     * @param value
-     * @param index
-     * @param isSelected
-     * @param cellHasFocus
-     * @return
+     * @param list list of products
+     * @param value product to be changed
+     * @param index position of selected text
+     * @param isSelected is any cell is selected
+     * @param cellHasFocus if cell has focus
+     * @return cell renderer
      */
     @Override
     public Component getListCellRendererComponent(JList<? extends Product> list,

@@ -33,14 +33,14 @@ public class Product {
     /**
      * Creates a product given all the parameters.
      *
-     * @param url
-     * @param name
-     * @param date
-     * @param currentPrice
-     * @param change
-     * @param startingPrice
-     * @param productIcon
-     * @param sound
+     * @param url the url pertaining to the product
+     * @param name name of the product
+     * @param date date of when the product was added
+     * @param currentPrice current price of the product
+     * @param change change between previous price and current
+     * @param startingPrice initial price of the product
+     * @param productIcon image of the product pertaining to the website its from
+     * @param sound sound indication if product price dropped.
      */
     public Product(String url, String name, String date, double currentPrice, double change, double startingPrice, Image productIcon, boolean sound) {
         this.url = url;
@@ -51,6 +51,7 @@ public class Product {
         this.startingPrice = startingPrice;
         this.productIcon = getIcon();
         this.sound = sound;
+        this.productIcon = productIcon;
         if (this.url.contains("amazon")) {
             urlSanitize();
         }
@@ -59,7 +60,7 @@ public class Product {
     /**
      * Sets the price to a new calculated price and updates the change.
      *
-     * @param price
+     * @param price price of the product
      */
     public void checkPrice(double price) {
         setCurrentPrice(price);
@@ -79,7 +80,7 @@ public class Product {
     }
 
     /**
-     * @return
+     * @return indication if price dropped
      */
     public boolean getSound() {
         return sound;
@@ -88,7 +89,7 @@ public class Product {
     /**
      * Returns a boolean that indicates if the current Product can play a sound.
      *
-     * @param playSound
+     * @param playSound indication if sound should be played
      */
     public void setSound(boolean playSound) {
         this.sound = playSound;
@@ -156,7 +157,7 @@ public class Product {
     /**
      * Sets the date of when a product was added.
      *
-     * @param date
+     * @param date day the product was added to the application
      */
     public void setDate(String date) {
         this.date = date;
@@ -172,7 +173,7 @@ public class Product {
     /**
      * Sets the value of difference between two prices.
      *
-     * @param change
+     * @param change get the change in product prices
      */
     public void setChange(double change) {
         this.change = change;
@@ -181,23 +182,23 @@ public class Product {
     /**
      * Get the initial price of a product.
      *
-     * @return
+     * @return starting price
      */
     public double getStartingPrice() {
         return startingPrice;
     }
 
     /**
-     * Sets the initial price of an item, if wrong.
+     * Sets the initial price of an item.
      *
-     * @param price
+     * @param price override the starting price of the product
      */
     public void setStartingPrice(double price) {
         this.startingPrice = price;
     }
 
     /**
-     * @return
+     * @return the default icon if non-existent or current product icon
      */
     public Image getIcon() {
         if (productIcon == null) {
@@ -207,7 +208,7 @@ public class Product {
     }
 
     /**
-     * @param icon
+     * @param icon sets the image to each individual product
      */
     public void setIcon(String icon) {
         this.productIcon = getImage(icon);
@@ -216,10 +217,10 @@ public class Product {
     /**
      * Return the image stored in the given file.
      *
-     * @param file
-     * @return
+     * @param file name of the file
+     * @return the image
      */
-    public Image getImage(String file) {
+    private Image getImage(String file) {
         try {
             URL url = new URL(getClass().getResource("/resources/"), file);
             return ImageIO.read(url);
@@ -235,7 +236,7 @@ public class Product {
      */
     private void urlSanitize() {
         String[] sanitize = url.split("/");
-        String newUrl = "";
+        StringBuilder newUrl = new StringBuilder();
         for (int i = 0; i < sanitize.length; i++) {
             if (sanitize[i].contains("ref") && !sanitize[i].contains("?ref")) {
                 sanitize[i] = "";
@@ -247,12 +248,12 @@ public class Product {
             if (sanitize[i].equals("/") || sanitize[i].equals("//")) {
                 sanitize[i] = "";
             }
-            newUrl += sanitize[i] + "/";
+            newUrl.append(sanitize[i]).append("/");
         }
-        if (newUrl.contains("//")) {
-            newUrl = newUrl.substring(0, newUrl.length() - 1);
+        if (newUrl.toString().contains("//")) {
+            newUrl = new StringBuilder(newUrl.substring(0, newUrl.length() - 1));
         }
-        setURL(newUrl);
+        setURL(newUrl.toString());
     }
 
 }

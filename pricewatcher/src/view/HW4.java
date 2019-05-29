@@ -32,7 +32,7 @@ public class HW4 extends HW3 {
     private JProgressBar download;
 
     public static void main(String[] args) {
-        HW4 main = new HW4();
+        new HW4();
     }
 
     /**
@@ -94,7 +94,7 @@ public class HW4 extends HW3 {
      * Listen to when the mouse is moving or clicking on certain areas of the
      * JList.
      *
-     * @return
+     * @return mouse motion listener
      */
     @Override
     protected MouseMotionListener mouseMotionListener() {
@@ -129,7 +129,7 @@ public class HW4 extends HW3 {
     }
 
     /**
-     * @param product
+     * @param product product to be updated
      */
     private void setPrice(Product product) {
 
@@ -137,7 +137,7 @@ public class HW4 extends HW3 {
         new Thread(() -> {
             int progress = 0;
             download.setVisible(true);
-            Double price = webPrice.getPrice(product.getURL());
+            double price = webPrice.getPrice(product.getURL());
             progress += 30;
             download.setValue(progress);
             if (price == -1) {
@@ -148,7 +148,12 @@ public class HW4 extends HW3 {
                         + "</center>"
                         + "</html>");
                 label.setHorizontalAlignment(SwingConstants.CENTER);
-                int option = JOptionPane.showConfirmDialog(HW4.this, label, "Error", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "network.png"))));
+                int option = JOptionPane.showConfirmDialog(HW4.this,
+                        label,
+                        "Error",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "network.png"))));
                 if (option == 0) {
                     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                         try {
@@ -183,7 +188,7 @@ public class HW4 extends HW3 {
     /**
      * Refreshes the list of products given within the {@link JList}
      *
-     * @param event
+     * @param event event
      */
     @Override
     protected void refreshButtonClicked(ActionEvent event) {
@@ -201,7 +206,7 @@ public class HW4 extends HW3 {
     /**
      * Refreshes the selected index inside of the {@link JList}
      *
-     * @param event
+     * @param event event
      */
     @Override
     protected void singleRefreshButtonClicked(ActionEvent event) {
@@ -234,7 +239,7 @@ public class HW4 extends HW3 {
                 message,
                 "Add",
                 JOptionPane.OK_CANCEL_OPTION,
-                0,
+                JOptionPane.ERROR_MESSAGE,
                 new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
         //OK
         if (option == 0) {
@@ -261,7 +266,7 @@ public class HW4 extends HW3 {
      * Searches for the {@link Product} Name and displays product that
      * contain the same letters while ignoring capitalization.
      *
-     * @param event
+     * @param event event
      */
     @Override
     protected void searchButtonClicked(ActionEvent event) {
@@ -274,7 +279,7 @@ public class HW4 extends HW3 {
                 message,
                 "Add",
                 JOptionPane.OK_CANCEL_OPTION,
-                0,
+                JOptionPane.ERROR_MESSAGE,
                 new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
         if (option == 0) {
             sortAlgorithm.filterBy(search.getText());
@@ -285,7 +290,7 @@ public class HW4 extends HW3 {
     /**
      * Deletes the currently selected cell within the {@link JList}.
      *
-     * @param event
+     * @param event event
      */
     @Override
     protected void deleteButtonClicked(ActionEvent event) {
@@ -293,7 +298,7 @@ public class HW4 extends HW3 {
             int selected = JOptionPane.showConfirmDialog(this,
                     "Do you want to delete this item?",
                     "Delete", JOptionPane.YES_NO_OPTION,
-                    0,
+                    JOptionPane.ERROR_MESSAGE,
                     new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "delete.png"))));
             if (selected == 0) {
                 storageManager.delete(viewListCell.getSelectedIndex());
@@ -311,7 +316,7 @@ public class HW4 extends HW3 {
      * editing, the current information of the selected cell's product will be
      * displayed within the {@link JOptionPane} given.
      *
-     * @param event
+     * @param event event
      */
     @Override
     protected void editButtonClicked(ActionEvent event) {
@@ -331,7 +336,7 @@ public class HW4 extends HW3 {
                     message,
                     "Edit",
                     JOptionPane.YES_NO_OPTION,
-                    0,
+                    JOptionPane.ERROR_MESSAGE,
                     new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "edit.png"))));
             if (option == 0) {
                 try {
@@ -484,7 +489,7 @@ public class HW4 extends HW3 {
      * Creates a {@link DefaultListModel} of the Product Manager.
      *
      * @param storageManager manages storage
-     * @return
+     * @return default list of the program
      */
     private DefaultListModel createListModel(StorageManager storageManager) {
         DefaultListModel generatedListModel = new DefaultListModel<>();
@@ -553,7 +558,7 @@ public class HW4 extends HW3 {
 
         JMenu appMenu = new JMenu("App");
         JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
-        about.addActionListener(this::aboutButtonClicked);
+        about.addActionListener((event) -> aboutButtonClicked());
         appMenu.add(about);
         JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
         exit.addActionListener(this::exitButtonClicked);

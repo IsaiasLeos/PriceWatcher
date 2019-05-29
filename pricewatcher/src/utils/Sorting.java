@@ -10,7 +10,7 @@ import storage.StorageManager;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -28,8 +28,8 @@ public class Sorting {
     /**
      * Default Constructor.
      *
-     * @param storageManager
-     * @param defaultListModel
+     * @param storageManager maintains all the products
+     * @param defaultListModel list of product currently in the program
      */
     public Sorting(StorageManager storageManager, DefaultListModel defaultListModel) {
         this.defaultListModel = defaultListModel;
@@ -39,31 +39,31 @@ public class Sorting {
     public void sortBy(int sortCode) {
         List<Product> products = storageManager.get();
         if (sortCode == 0) {
-            Collections.sort(products, (Product product2, Product product1) -> product2.getDate().compareTo(product1.getDate()));
+            products.sort(Comparator.comparing(Product::getDate));
         } else if (sortCode == 1) {
-            Collections.sort(products, (Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
+            products.sort((Product product2, Product product1) -> product1.getDate().compareTo(product2.getDate()));
         } else if (sortCode == 2) {
-            Collections.sort(products, (Product product2, Product product1) -> product2.getName().compareTo(product1.getName()));
+            products.sort(Comparator.comparing(Product::getName));
         } else if (sortCode == 3) {
-            Collections.sort(products, (Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
+            products.sort((Product product2, Product product1) -> product1.getName().compareTo(product2.getName()));
         } else if (sortCode == 4) {
-            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
+            products.sort((Product product2, Product product1) -> Double.valueOf("" + product1.getCurrentPrice()).compareTo(product2.getCurrentPrice()));
         } else if (sortCode == 5) {
-            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
+            products.sort((Product product2, Product product1) -> Double.valueOf("" + product2.getCurrentPrice()).compareTo(product1.getCurrentPrice()));
         } else if (sortCode == 6) {
-            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
+            products.sort((Product product2, Product product1) -> Double.valueOf("" + product2.getChange()).compareTo(product1.getChange()));
         } else if (sortCode == 7) {
-            Collections.sort(products, (Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
+            products.sort((Product product2, Product product1) -> Double.valueOf("" + product1.getChange()).compareTo(product2.getChange()));
         }
         storageManager.set(products);
         defaultListModel.removeAllElements();
-        storageManager.get().forEach((element) -> defaultListModel.addElement(element));
+        storageManager.get().forEach(this::accept);
     }
 
     /**
      * Filters the JList and {@link controller.ProductManager} given the URL.
      *
-     * @param filter
+     * @param filter filter to be applied
      */
     public void filterBy(String filter) {
         if (isFilter) {
@@ -95,4 +95,7 @@ public class Sorting {
         }
     }
 
+    private void accept(Product element) {
+        defaultListModel.addElement(element);
+    }
 }

@@ -36,7 +36,7 @@ public class WebScrape {
             output = matcher.group();
         }
         if (input.contains(",")) {
-            String[] tokens = input.split(">|=");
+            String[] tokens = input.split("[>=]");
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].equals("\"\" content")) {
                     output = tokens[i + 1];
@@ -54,7 +54,7 @@ public class WebScrape {
      * @param url product's URL handle
      * @return return -1 if couldn't connect webpage otherwise product price
      */
-    public double priceScrape(String url) {
+    protected double priceScrape(String url) {
         if (url.contains("ebay")) {
             return scrapeEbay(url);
         } else if (url.contains("amazon")) {
@@ -74,8 +74,8 @@ public class WebScrape {
      * @return the price of an item that is from Ebay
      */
     private double scrapeEbay(String urlString) {
-        HttpURLConnection con = null;
-        String priceOutput = "";
+        HttpURLConnection con;
+        String priceOutput;
         try {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();
@@ -106,11 +106,11 @@ public class WebScrape {
      * then a period or any number of digits before the period. After the period
      * any number of digits.
      *
-     * @return
+     * @return the price of an item that is from Amazon
      */
     private double scrapeAmazon(String urlString) {
-        HttpURLConnection con = null;
-        String output = "";
+        HttpURLConnection con;
+        String output;
         try {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();
@@ -118,7 +118,7 @@ public class WebScrape {
             if (encoding == null) {
                 encoding = "utf-8";
             }
-            InputStreamReader reader = null;
+            InputStreamReader reader;
             if ("gzip".equals(encoding)) {
                 reader = new InputStreamReader(new GZIPInputStream(con.getInputStream()));
             } else {
@@ -146,11 +146,11 @@ public class WebScrape {
      * then a period or any number of digits before the period. After the period
      * any number of digits.
      *
-     * @return
+     * @return the price of an item that is from walmart
      */
     private double scrapeWalmart(String urlString) {
-        HttpURLConnection con = null;
-        String output = "";
+        HttpURLConnection con;
+        String output;
         try {
             URL url = new URL(urlString);
             con = (HttpURLConnection) url.openConnection();

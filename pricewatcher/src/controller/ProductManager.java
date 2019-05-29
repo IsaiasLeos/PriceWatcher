@@ -19,7 +19,7 @@ public class ProductManager {
     /**
      * Adds a {@link model.Product} to the Product List.
      *
-     * @param product
+     * @param product product
      */
     public void add(Product product) {
         this.get().add(product);
@@ -28,7 +28,7 @@ public class ProductManager {
     /**
      * Deletes a {@link model.Product} from the Product List.
      *
-     * @param product
+     * @param product product
      */
     public void delete(int product) {
         this.get().remove(product);
@@ -44,12 +44,12 @@ public class ProductManager {
     /**
      * Creates a Product and adds it to the existing ArrayList.
      *
-     * @param name
-     * @param date
-     * @param currentPrice
-     * @param startingPrice
-     * @param URL
-     * @param change
+     * @param name name of product
+     * @param date date when product was added
+     * @param currentPrice current price of the product
+     * @param startingPrice initial price of the product
+     * @param URL url pertaining to the product
+     * @param change the change between previous price and current
      */
     protected void create(String name, String date, double currentPrice, double startingPrice, String URL, double change) {
         Product generated = new Product();
@@ -65,7 +65,7 @@ public class ProductManager {
     /**
      * Sets the current product list to the given one from the parameter.
      *
-     * @param arrOfProducts
+     * @param arrOfProducts a list of products
      */
     public void set(List<Product> arrOfProducts) {
         this.arrOfProducts = arrOfProducts;

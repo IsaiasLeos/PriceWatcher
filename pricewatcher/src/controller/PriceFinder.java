@@ -1,6 +1,7 @@
 package controller;
 
 import network.WebScrape;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
@@ -16,8 +17,7 @@ public class PriceFinder extends WebScrape {
     /**
      * Scrapes a web-site and obtains the price of an item, given the URL.
      *
-     * @param url
-     * @return
+     * @param url url of product
      */
     public double getPrice(String url) {
         return priceScrape(url);
@@ -26,7 +26,7 @@ public class PriceFinder extends WebScrape {
     /**
      * Generate a simulated price of an item between $300.00-$400.00.
      *
-     * @param medValue
+     * @param medValue value to randomize within ranges
      * @return random double between 300 - 400
      */
     public double getPrice(Double medValue) {

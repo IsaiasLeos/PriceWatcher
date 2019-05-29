@@ -27,13 +27,12 @@ public class ItemView extends JPanel {
 
     private Product product;
 
-    public final Dimension dim = new Dimension(0, 160);
-
     /**
      * Create a new instance.
      *
      */
-    public ItemView() {
+    ItemView() {
+        Dimension dim = new Dimension(0, 160);
         setPreferredSize(dim);
         product = new Product();
     }
@@ -59,7 +58,7 @@ public class ItemView extends JPanel {
         y += 20;
         if (product.getSound()) {
             if (f > 0.0) {
-                priceDecreased("play.wav");
+                priceDecreased();
             }
             product.setSound(false);
         }
@@ -78,7 +77,7 @@ public class ItemView extends JPanel {
      * @param productPostfix second part of the string
      * @param font the font type e.g. bold or plain
      * @param color the color of the font
-     * @return the re-formated string
+     * @return the re-formatted string
      */
     private AttributedCharacterIterator textAttrManipulation(String productPrefix, String productPostfix, int font, Color color) {
         try {
@@ -102,12 +101,11 @@ public class ItemView extends JPanel {
      * Play the audio clip (wav) specified by a URL. This method has no effect
      * if the audio clip cannot be found.
      *
-     * @param file
      */
     @SuppressWarnings("CallToPrintStackTrace")
-    private void priceDecreased(String filename) {
+    private void priceDecreased() {
         try {
-            URL url = new URL(getClass().getResource("/resources/"), filename);
+            URL url = new URL(getClass().getResource("/resources/"), "play.wav");
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
@@ -119,7 +117,7 @@ public class ItemView extends JPanel {
 
     /**
      *
-     * @param product
+     * @param product product to be overridden
      */
     public void setProduct(Product product) {
         this.product = product;

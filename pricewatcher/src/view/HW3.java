@@ -25,7 +25,7 @@ import java.util.Objects;
 public class HW3 extends JFrame {
 
     private JLabel msgBar = new JLabel("");
-    private JList<? extends Object> viewListCell;
+    private JList<?> viewListCell;
     private DefaultListModel<Product> defaultListModel;
     private JPopupMenu popupMenu;
     private PriceFinder webPrice;
@@ -52,13 +52,13 @@ public class HW3 extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(true);
-        showMessage("Welcome!", 4);
+        showMessage("Welcome!");
         pack();
         setVisible(true);
     }
 
     public static void main(String[] args) {
-        HW3 main = new HW3();
+        new HW3();
     }
 
     /**
@@ -97,14 +97,13 @@ public class HW3 extends JFrame {
     /**
      * Show briefly the given string in the message bar.
      *
-     * @param msg  msg to display
-     * @param time time the message will appear
+     * @param msg msg to display
      */
-    private void showMessage(String msg, int time) {
+    private void showMessage(String msg) {
         msgBar.setText(msg);
         new Thread(() -> {
             try {
-                Thread.sleep(time * 1000);
+                Thread.sleep(4 * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -204,7 +203,7 @@ public class HW3 extends JFrame {
     /**
      * Refreshes the list of products given within the {@link JList}
      *
-     * @param event
+     * @param event event
      */
     protected void refreshButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() != 0) {
@@ -212,9 +211,9 @@ public class HW3 extends JFrame {
                 defaultListModel.get(i).checkPrice(webPrice.getPrice(defaultListModel.get(i).getCurrentPrice()));
             }
             repaint();
-            showMessage("Refreshing...", 4);
+            showMessage("Refreshing...");
         } else {
-            showMessage("Product List is Empty", 4);
+            showMessage("Product List is Empty");
         }
 
     }
@@ -222,15 +221,15 @@ public class HW3 extends JFrame {
     /**
      * Refreshes the selected index inside of the {@link JList}
      *
-     * @param event
+     * @param event event
      */
     protected void singleRefreshButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
             defaultListModel.get(viewListCell.getSelectedIndex()).checkPrice(webPrice.getPrice(defaultListModel.get(viewListCell.getSelectedIndex()).getCurrentPrice()));
             repaint();
-            showMessage("Refreshing...", 4);
+            showMessage("Refreshing...");
         } else {
-            showMessage("Not Selecting an Item", 4);
+            showMessage("Not Selecting an Item");
         }
 
     }
@@ -240,7 +239,7 @@ public class HW3 extends JFrame {
      * a given name, URL, and price of the product. Date will be given to
      * whatever the given date is.
      *
-     * @param event
+     * @param event event
      */
     protected void addButtonClicked(ActionEvent event) {
         JTextField name = new JTextField();
@@ -255,16 +254,16 @@ public class HW3 extends JFrame {
                 message,
                 "Add",
                 JOptionPane.OK_CANCEL_OPTION,
-                0
-                , new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
+                JOptionPane.ERROR_MESSAGE,
+                new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
         //OK
         if (option == 0) {
             try {
                 Product generatedProduct = createProduct(url.getText(), name.getText(), Double.parseDouble(price.getText()));
                 defaultListModel.addElement(generatedProduct);
-                showMessage("Product Successfully Added", 4);
+                showMessage("Product Successfully Added");
             } catch (IllegalArgumentException e) {
-                showMessage("Please re-enter correct information.", 4);
+                showMessage("Please re-enter correct information.");
             }
         }
     }
@@ -274,7 +273,7 @@ public class HW3 extends JFrame {
      *
      * @return current date in MM/dd/yyyy format
      */
-    public String getCurrentDate() {
+    String getCurrentDate() {
         SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
@@ -284,20 +283,15 @@ public class HW3 extends JFrame {
      * Searches for the {@link Product} Name and displays product that
      * contain the same letters while ignoring capitalization.
      *
-     * @param event
+     * @param event event
      */
     protected void searchButtonClicked(ActionEvent event) {
-        JTextField search = new JTextField();
-        Object[] message = {
-                "Search:", search
-        };
-        int option = JOptionPane.showConfirmDialog(this, message, "Add", JOptionPane.OK_CANCEL_OPTION, 0, new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
     }
 
     /**
      * Moves to the top of cell within the {@link JList}.
      *
-     * @param event
+     * @param event event
      */
     protected void moveUpButtonClicked(ActionEvent event) {
         if (defaultListModel.getSize() > -1) {
@@ -308,7 +302,7 @@ public class HW3 extends JFrame {
     /**
      * Moves to the last of the cell within the {@link JList}.
      *
-     * @param event
+     * @param event event
      */
     protected void moveDownButtonClicked(ActionEvent event) {
         int size = defaultListModel.getSize();
@@ -320,14 +314,14 @@ public class HW3 extends JFrame {
     /**
      * Deletes the currently selected cell within the {@link JList}.
      *
-     * @param event
+     * @param event event
      */
     protected void deleteButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
             defaultListModel.remove(viewListCell.getSelectedIndex());
             repaint();
         } else {
-            showMessage("Not Selecting an Item", 4);
+            showMessage("Not Selecting an Item");
         }
     }
 
@@ -336,7 +330,7 @@ public class HW3 extends JFrame {
      * editing, the current information of the selected cell's product will be
      * displayed within the {@link JOptionPane} given.
      *
-     * @param event
+     * @param event event
      */
     protected void editButtonClicked(ActionEvent event) {
         if (viewListCell.getSelectedIndex() > -1) {
@@ -349,7 +343,12 @@ public class HW3 extends JFrame {
                     "Product URL:", url,
                     "Product Price:", price
             };
-            int option = JOptionPane.showConfirmDialog(this, message, "Edit", JOptionPane.YES_NO_OPTION, 0, new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
+            int option = JOptionPane.showConfirmDialog(this,
+                    message,
+                    "Edit",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.ERROR_MESSAGE,
+                    new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("resources/" + "plus.png"))));
             if (option == 0) {
                 try {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setName(name.getText());
@@ -357,13 +356,13 @@ public class HW3 extends JFrame {
                     defaultListModel.get(viewListCell.getSelectedIndex()).setStartingPrice(Double.parseDouble(price.getText()));
                     defaultListModel.get(viewListCell.getSelectedIndex()).setCurrentPrice(Double.parseDouble(price.getText()));
                     repaint();
-                    showMessage("Succesfully Edited a Product", 4);
+                    showMessage("Successfully Edited a Product");
                 } catch (NumberFormatException e) {
-                    showMessage("Please re-enter correct information.", 4);
+                    showMessage("Please re-enter correct information.");
                 }
             }
         } else {
-            showMessage("Not Selecting an Item", 4);
+            showMessage("Not Selecting an Item");
         }
     }
 
@@ -379,16 +378,14 @@ public class HW3 extends JFrame {
                 e.printStackTrace();
             }
         }
-        showMessage("Opening Webpage", 4);
+        showMessage("Opening Web-page");
     }
 
     /**
      * Shows a {@link JLabel} with the information of who worked on this project
      * and a link to the source code.
-     *
-     * @param event
      */
-    public void aboutButtonClicked(ActionEvent event) {
+    void aboutButtonClicked() {
         JLabel label = new JLabel("<html>"
                 + "<center>"
                 + "<strong>PriceWatcher v3.6</strong>"
@@ -411,7 +408,7 @@ public class HW3 extends JFrame {
     /**
      * Exits the program.
      *
-     * @param event
+     * @param event event
      */
     protected void exitButtonClicked(ActionEvent event) {
         dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
@@ -434,9 +431,9 @@ public class HW3 extends JFrame {
      */
     protected JToolBar createJToolBar(String title) {
         JToolBar toolBar = new JToolBar(title);
-        JButton checkmark = createJButton("checkmark.png", "Check Item Prices");
-        checkmark.addActionListener(this::refreshButtonClicked);
-        toolBar.add(checkmark);
+        JButton checkItemPrices = createJButton("checkItemPrices.png", "Check Item Prices");
+        checkItemPrices.addActionListener(this::refreshButtonClicked);
+        toolBar.add(checkItemPrices);
         JButton add = createJButton("plus.png", "Add Product");
         add.addActionListener(this::addButtonClicked);
         toolBar.add(add);
@@ -464,7 +461,7 @@ public class HW3 extends JFrame {
         toolBar.add(edit);
         toolBar.addSeparator();
         JButton about = createJButton("about.png", "App Information");
-        about.addActionListener(this::aboutButtonClicked);
+        about.addActionListener((event) -> aboutButtonClicked());
         toolBar.add(about);
         return toolBar;
     }
@@ -539,7 +536,7 @@ public class HW3 extends JFrame {
         JMenu editMenu = new JMenu("Item");
         JMenu sortMenu = new JMenu("Sort");
         JMenuItem about = createJMenuItem("About", "App Information", "about.png", KeyEvent.VK_A, ActionEvent.CTRL_MASK);
-        about.addActionListener(this::aboutButtonClicked);
+        about.addActionListener((event) -> aboutButtonClicked());
         appMenu.add(about);
         JMenuItem exit = createJMenuItem("Exit", "Exit Program", "plus.png", KeyEvent.VK_X, ActionEvent.CTRL_MASK);
         exit.addActionListener(this::exitButtonClicked);
@@ -624,7 +621,7 @@ public class HW3 extends JFrame {
             clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(selection, selection);
         } else {
-            showMessage("Not Selecting an Item", 4);
+            showMessage("Not Selecting an Item");
         }
     }
 
